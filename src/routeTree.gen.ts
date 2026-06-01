@@ -13,8 +13,17 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppWalletPlannerRouteImport } from './routes/_app/wallet-planner'
+import { Route as AppSavingsRouteImport } from './routes/_app/savings'
+import { Route as AppProfileRouteImport } from './routes/_app/profile'
+import { Route as AppPersonalRouteImport } from './routes/_app/personal'
 import { Route as AppMyBusinessesRouteImport } from './routes/_app/my-businesses'
+import { Route as AppLendersRouteImport } from './routes/_app/lenders'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as AppContactsRouteImport } from './routes/_app/contacts'
+import { Route as AppBusinessPlansRouteImport } from './routes/_app/business-plans'
+import { Route as AppBankAccountsRouteImport } from './routes/_app/bank-accounts'
+import { Route as AppAdminRouteImport } from './routes/_app/admin'
 import { Route as AppRoadmapsIndexRouteImport } from './routes/_app/roadmaps.index'
 import { Route as AppBusinessesIndexRouteImport } from './routes/_app/businesses.index'
 import { Route as AppRoadmapsBusinessIdRouteImport } from './routes/_app/roadmaps.$businessId'
@@ -41,14 +50,59 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppWalletPlannerRoute = AppWalletPlannerRouteImport.update({
+  id: '/wallet-planner',
+  path: '/wallet-planner',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSavingsRoute = AppSavingsRouteImport.update({
+  id: '/savings',
+  path: '/savings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPersonalRoute = AppPersonalRouteImport.update({
+  id: '/personal',
+  path: '/personal',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMyBusinessesRoute = AppMyBusinessesRouteImport.update({
   id: '/my-businesses',
   path: '/my-businesses',
   getParentRoute: () => AppRoute,
 } as any)
+const AppLendersRoute = AppLendersRouteImport.update({
+  id: '/lenders',
+  path: '/lenders',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppContactsRoute = AppContactsRouteImport.update({
+  id: '/contacts',
+  path: '/contacts',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBusinessPlansRoute = AppBusinessPlansRouteImport.update({
+  id: '/business-plans',
+  path: '/business-plans',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBankAccountsRoute = AppBankAccountsRouteImport.update({
+  id: '/bank-accounts',
+  path: '/bank-accounts',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAdminRoute = AppAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => AppRoute,
 } as any)
 const AppRoadmapsIndexRoute = AppRoadmapsIndexRouteImport.update({
@@ -86,8 +140,17 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/admin': typeof AppAdminRoute
+  '/bank-accounts': typeof AppBankAccountsRoute
+  '/business-plans': typeof AppBusinessPlansRoute
+  '/contacts': typeof AppContactsRoute
   '/dashboard': typeof AppDashboardRoute
+  '/lenders': typeof AppLendersRoute
   '/my-businesses': typeof AppMyBusinessesRoute
+  '/personal': typeof AppPersonalRoute
+  '/profile': typeof AppProfileRoute
+  '/savings': typeof AppSavingsRoute
+  '/wallet-planner': typeof AppWalletPlannerRoute
   '/accounting/journal': typeof AppAccountingJournalRoute
   '/accounting/reports': typeof AppAccountingReportsRoute
   '/businesses/$slug': typeof AppBusinessesSlugRoute
@@ -99,8 +162,17 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/admin': typeof AppAdminRoute
+  '/bank-accounts': typeof AppBankAccountsRoute
+  '/business-plans': typeof AppBusinessPlansRoute
+  '/contacts': typeof AppContactsRoute
   '/dashboard': typeof AppDashboardRoute
+  '/lenders': typeof AppLendersRoute
   '/my-businesses': typeof AppMyBusinessesRoute
+  '/personal': typeof AppPersonalRoute
+  '/profile': typeof AppProfileRoute
+  '/savings': typeof AppSavingsRoute
+  '/wallet-planner': typeof AppWalletPlannerRoute
   '/accounting/journal': typeof AppAccountingJournalRoute
   '/accounting/reports': typeof AppAccountingReportsRoute
   '/businesses/$slug': typeof AppBusinessesSlugRoute
@@ -114,8 +186,17 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/_app/admin': typeof AppAdminRoute
+  '/_app/bank-accounts': typeof AppBankAccountsRoute
+  '/_app/business-plans': typeof AppBusinessPlansRoute
+  '/_app/contacts': typeof AppContactsRoute
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/lenders': typeof AppLendersRoute
   '/_app/my-businesses': typeof AppMyBusinessesRoute
+  '/_app/personal': typeof AppPersonalRoute
+  '/_app/profile': typeof AppProfileRoute
+  '/_app/savings': typeof AppSavingsRoute
+  '/_app/wallet-planner': typeof AppWalletPlannerRoute
   '/_app/accounting/journal': typeof AppAccountingJournalRoute
   '/_app/accounting/reports': typeof AppAccountingReportsRoute
   '/_app/businesses/$slug': typeof AppBusinessesSlugRoute
@@ -129,8 +210,17 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/register'
+    | '/admin'
+    | '/bank-accounts'
+    | '/business-plans'
+    | '/contacts'
     | '/dashboard'
+    | '/lenders'
     | '/my-businesses'
+    | '/personal'
+    | '/profile'
+    | '/savings'
+    | '/wallet-planner'
     | '/accounting/journal'
     | '/accounting/reports'
     | '/businesses/$slug'
@@ -142,8 +232,17 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/register'
+    | '/admin'
+    | '/bank-accounts'
+    | '/business-plans'
+    | '/contacts'
     | '/dashboard'
+    | '/lenders'
     | '/my-businesses'
+    | '/personal'
+    | '/profile'
+    | '/savings'
+    | '/wallet-planner'
     | '/accounting/journal'
     | '/accounting/reports'
     | '/businesses/$slug'
@@ -156,8 +255,17 @@ export interface FileRouteTypes {
     | '/_app'
     | '/login'
     | '/register'
+    | '/_app/admin'
+    | '/_app/bank-accounts'
+    | '/_app/business-plans'
+    | '/_app/contacts'
     | '/_app/dashboard'
+    | '/_app/lenders'
     | '/_app/my-businesses'
+    | '/_app/personal'
+    | '/_app/profile'
+    | '/_app/savings'
+    | '/_app/wallet-planner'
     | '/_app/accounting/journal'
     | '/_app/accounting/reports'
     | '/_app/businesses/$slug'
@@ -203,6 +311,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/wallet-planner': {
+      id: '/_app/wallet-planner'
+      path: '/wallet-planner'
+      fullPath: '/wallet-planner'
+      preLoaderRoute: typeof AppWalletPlannerRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/savings': {
+      id: '/_app/savings'
+      path: '/savings'
+      fullPath: '/savings'
+      preLoaderRoute: typeof AppSavingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/profile': {
+      id: '/_app/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/personal': {
+      id: '/_app/personal'
+      path: '/personal'
+      fullPath: '/personal'
+      preLoaderRoute: typeof AppPersonalRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/my-businesses': {
       id: '/_app/my-businesses'
       path: '/my-businesses'
@@ -210,11 +346,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMyBusinessesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/lenders': {
+      id: '/_app/lenders'
+      path: '/lenders'
+      fullPath: '/lenders'
+      preLoaderRoute: typeof AppLendersRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/dashboard': {
       id: '/_app/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/contacts': {
+      id: '/_app/contacts'
+      path: '/contacts'
+      fullPath: '/contacts'
+      preLoaderRoute: typeof AppContactsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/business-plans': {
+      id: '/_app/business-plans'
+      path: '/business-plans'
+      fullPath: '/business-plans'
+      preLoaderRoute: typeof AppBusinessPlansRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/bank-accounts': {
+      id: '/_app/bank-accounts'
+      path: '/bank-accounts'
+      fullPath: '/bank-accounts'
+      preLoaderRoute: typeof AppBankAccountsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/admin': {
+      id: '/_app/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AppAdminRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/roadmaps/': {
@@ -263,8 +434,17 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppAdminRoute: typeof AppAdminRoute
+  AppBankAccountsRoute: typeof AppBankAccountsRoute
+  AppBusinessPlansRoute: typeof AppBusinessPlansRoute
+  AppContactsRoute: typeof AppContactsRoute
   AppDashboardRoute: typeof AppDashboardRoute
+  AppLendersRoute: typeof AppLendersRoute
   AppMyBusinessesRoute: typeof AppMyBusinessesRoute
+  AppPersonalRoute: typeof AppPersonalRoute
+  AppProfileRoute: typeof AppProfileRoute
+  AppSavingsRoute: typeof AppSavingsRoute
+  AppWalletPlannerRoute: typeof AppWalletPlannerRoute
   AppAccountingJournalRoute: typeof AppAccountingJournalRoute
   AppAccountingReportsRoute: typeof AppAccountingReportsRoute
   AppBusinessesSlugRoute: typeof AppBusinessesSlugRoute
@@ -274,8 +454,17 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAdminRoute: AppAdminRoute,
+  AppBankAccountsRoute: AppBankAccountsRoute,
+  AppBusinessPlansRoute: AppBusinessPlansRoute,
+  AppContactsRoute: AppContactsRoute,
   AppDashboardRoute: AppDashboardRoute,
+  AppLendersRoute: AppLendersRoute,
   AppMyBusinessesRoute: AppMyBusinessesRoute,
+  AppPersonalRoute: AppPersonalRoute,
+  AppProfileRoute: AppProfileRoute,
+  AppSavingsRoute: AppSavingsRoute,
+  AppWalletPlannerRoute: AppWalletPlannerRoute,
   AppAccountingJournalRoute: AppAccountingJournalRoute,
   AppAccountingReportsRoute: AppAccountingReportsRoute,
   AppBusinessesSlugRoute: AppBusinessesSlugRoute,
