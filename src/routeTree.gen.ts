@@ -11,7 +11,14 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppMyBusinessesRouteImport } from './routes/_app/my-businesses'
+import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as AppRoadmapsIndexRouteImport } from './routes/_app/roadmaps.index'
+import { Route as AppBusinessesIndexRouteImport } from './routes/_app/businesses.index'
+import { Route as AppRoadmapsBusinessIdRouteImport } from './routes/_app/roadmaps.$businessId'
+import { Route as AppBusinessesSlugRouteImport } from './routes/_app/businesses.$slug'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -23,38 +30,121 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppMyBusinessesRoute = AppMyBusinessesRouteImport.update({
+  id: '/my-businesses',
+  path: '/my-businesses',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppRoadmapsIndexRoute = AppRoadmapsIndexRouteImport.update({
+  id: '/roadmaps/',
+  path: '/roadmaps/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBusinessesIndexRoute = AppBusinessesIndexRouteImport.update({
+  id: '/businesses/',
+  path: '/businesses/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppRoadmapsBusinessIdRoute = AppRoadmapsBusinessIdRouteImport.update({
+  id: '/roadmaps/$businessId',
+  path: '/roadmaps/$businessId',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBusinessesSlugRoute = AppBusinessesSlugRouteImport.update({
+  id: '/businesses/$slug',
+  path: '/businesses/$slug',
+  getParentRoute: () => AppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/my-businesses': typeof AppMyBusinessesRoute
+  '/businesses/$slug': typeof AppBusinessesSlugRoute
+  '/roadmaps/$businessId': typeof AppRoadmapsBusinessIdRoute
+  '/businesses/': typeof AppBusinessesIndexRoute
+  '/roadmaps/': typeof AppRoadmapsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/my-businesses': typeof AppMyBusinessesRoute
+  '/businesses/$slug': typeof AppBusinessesSlugRoute
+  '/roadmaps/$businessId': typeof AppRoadmapsBusinessIdRoute
+  '/businesses': typeof AppBusinessesIndexRoute
+  '/roadmaps': typeof AppRoadmapsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/my-businesses': typeof AppMyBusinessesRoute
+  '/_app/businesses/$slug': typeof AppBusinessesSlugRoute
+  '/_app/roadmaps/$businessId': typeof AppRoadmapsBusinessIdRoute
+  '/_app/businesses/': typeof AppBusinessesIndexRoute
+  '/_app/roadmaps/': typeof AppRoadmapsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/register'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/dashboard'
+    | '/my-businesses'
+    | '/businesses/$slug'
+    | '/roadmaps/$businessId'
+    | '/businesses/'
+    | '/roadmaps/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/register'
-  id: '__root__' | '/' | '/login' | '/register'
+  to:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/dashboard'
+    | '/my-businesses'
+    | '/businesses/$slug'
+    | '/roadmaps/$businessId'
+    | '/businesses'
+    | '/roadmaps'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/login'
+    | '/register'
+    | '/_app/dashboard'
+    | '/_app/my-businesses'
+    | '/_app/businesses/$slug'
+    | '/_app/roadmaps/$businessId'
+    | '/_app/businesses/'
+    | '/_app/roadmaps/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
 }
@@ -75,6 +165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -82,14 +179,87 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/my-businesses': {
+      id: '/_app/my-businesses'
+      path: '/my-businesses'
+      fullPath: '/my-businesses'
+      preLoaderRoute: typeof AppMyBusinessesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/roadmaps/': {
+      id: '/_app/roadmaps/'
+      path: '/roadmaps'
+      fullPath: '/roadmaps/'
+      preLoaderRoute: typeof AppRoadmapsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/businesses/': {
+      id: '/_app/businesses/'
+      path: '/businesses'
+      fullPath: '/businesses/'
+      preLoaderRoute: typeof AppBusinessesIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/roadmaps/$businessId': {
+      id: '/_app/roadmaps/$businessId'
+      path: '/roadmaps/$businessId'
+      fullPath: '/roadmaps/$businessId'
+      preLoaderRoute: typeof AppRoadmapsBusinessIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/businesses/$slug': {
+      id: '/_app/businesses/$slug'
+      path: '/businesses/$slug'
+      fullPath: '/businesses/$slug'
+      preLoaderRoute: typeof AppBusinessesSlugRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppDashboardRoute: typeof AppDashboardRoute
+  AppMyBusinessesRoute: typeof AppMyBusinessesRoute
+  AppBusinessesSlugRoute: typeof AppBusinessesSlugRoute
+  AppRoadmapsBusinessIdRoute: typeof AppRoadmapsBusinessIdRoute
+  AppBusinessesIndexRoute: typeof AppBusinessesIndexRoute
+  AppRoadmapsIndexRoute: typeof AppRoadmapsIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppDashboardRoute: AppDashboardRoute,
+  AppMyBusinessesRoute: AppMyBusinessesRoute,
+  AppBusinessesSlugRoute: AppBusinessesSlugRoute,
+  AppRoadmapsBusinessIdRoute: AppRoadmapsBusinessIdRoute,
+  AppBusinessesIndexRoute: AppBusinessesIndexRoute,
+  AppRoadmapsIndexRoute: AppRoadmapsIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
