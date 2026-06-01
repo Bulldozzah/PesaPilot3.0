@@ -24,17 +24,21 @@ function AppLayout() {
 
   useEffect(() => {
     if (!user) return;
+    if (location.pathname.startsWith("/profile")) {
+      setProfileChecked(true);
+      return;
+    }
     let cancelled = false;
     (async () => {
       const { data } = await supabase
         .from("profiles")
         .select("completed_onboarding, full_name")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
       if (cancelled) return;
-      const complete = !!data?.completed_onboarding && !!data?.full_name?.trim();
       setProfileChecked(true);
-      if (!complete && !location.pathname.startsWith("/profile")) {
+      const complete = !!data?.completed_onboarding && !!data?.full_name?.trim();
+      if (!complete) {
         navigate({ to: "/profile", search: { firstTimeSetup: true }, replace: true });
       }
     })();
@@ -43,7 +47,7 @@ function AppLayout() {
     };
   }, [user, location.pathname, navigate]);
 
-  if (isLoading || !isAuthenticated || (user && !profileChecked)) {
+  if (isLoading || !isAuthenticated) {
     return (
       <div className="grid min-h-screen place-items-center bg-background text-muted-foreground">
         Loading…
