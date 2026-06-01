@@ -326,6 +326,33 @@ export type Database = {
           },
         ]
       }
+      country_authorities: {
+        Row: {
+          authority_name: string
+          authority_website: string | null
+          country_code: string
+          country_name: string
+          created_at: string
+          id: number
+        }
+        Insert: {
+          authority_name: string
+          authority_website?: string | null
+          country_code: string
+          country_name: string
+          created_at?: string
+          id?: number
+        }
+        Update: {
+          authority_name?: string
+          authority_website?: string | null
+          country_code?: string
+          country_name?: string
+          created_at?: string
+          id?: number
+        }
+        Relationships: []
+      }
       journal_entries: {
         Row: {
           created_at: string
@@ -493,6 +520,7 @@ export type Database = {
           business_name: string | null
           completed_onboarding: boolean
           country: string | null
+          country_code: string | null
           created_at: string
           currency: string | null
           full_name: string | null
@@ -505,6 +533,7 @@ export type Database = {
           business_name?: string | null
           completed_onboarding?: boolean
           country?: string | null
+          country_code?: string | null
           created_at?: string
           currency?: string | null
           full_name?: string | null
@@ -517,6 +546,7 @@ export type Database = {
           business_name?: string | null
           completed_onboarding?: boolean
           country?: string | null
+          country_code?: string | null
           created_at?: string
           currency?: string | null
           full_name?: string | null
@@ -585,6 +615,53 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      step_progress: {
+        Row: {
+          checklist_status: Json
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          id: number
+          notes: string | null
+          step_number: number
+          step_title: string | null
+          updated_at: string
+          user_business_id: string
+        }
+        Insert: {
+          checklist_status?: Json
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: number
+          notes?: string | null
+          step_number: number
+          step_title?: string | null
+          updated_at?: string
+          user_business_id: string
+        }
+        Update: {
+          checklist_status?: Json
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: number
+          notes?: string | null
+          step_number?: number
+          step_title?: string | null
+          updated_at?: string
+          user_business_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "step_progress_user_business_id_fkey"
+            columns: ["user_business_id"]
+            isOneToOne: false
+            referencedRelation: "user_businesses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_businesses: {
         Row: {

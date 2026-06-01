@@ -98,6 +98,7 @@ function Profile() {
       .update({
         full_name: fullName.trim(),
         country: country.name,
+        country_code: country.code,
         currency,
         phone: fullPhone,
         business_name: businessName.trim() || null,
