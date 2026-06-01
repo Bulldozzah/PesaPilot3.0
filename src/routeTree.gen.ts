@@ -19,6 +19,8 @@ import { Route as AppRoadmapsIndexRouteImport } from './routes/_app/roadmaps.ind
 import { Route as AppBusinessesIndexRouteImport } from './routes/_app/businesses.index'
 import { Route as AppRoadmapsBusinessIdRouteImport } from './routes/_app/roadmaps.$businessId'
 import { Route as AppBusinessesSlugRouteImport } from './routes/_app/businesses.$slug'
+import { Route as AppAccountingReportsRouteImport } from './routes/_app/accounting/reports'
+import { Route as AppAccountingJournalRouteImport } from './routes/_app/accounting/journal'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -69,6 +71,16 @@ const AppBusinessesSlugRoute = AppBusinessesSlugRouteImport.update({
   path: '/businesses/$slug',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAccountingReportsRoute = AppAccountingReportsRouteImport.update({
+  id: '/accounting/reports',
+  path: '/accounting/reports',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAccountingJournalRoute = AppAccountingJournalRouteImport.update({
+  id: '/accounting/journal',
+  path: '/accounting/journal',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -76,6 +88,8 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/dashboard': typeof AppDashboardRoute
   '/my-businesses': typeof AppMyBusinessesRoute
+  '/accounting/journal': typeof AppAccountingJournalRoute
+  '/accounting/reports': typeof AppAccountingReportsRoute
   '/businesses/$slug': typeof AppBusinessesSlugRoute
   '/roadmaps/$businessId': typeof AppRoadmapsBusinessIdRoute
   '/businesses/': typeof AppBusinessesIndexRoute
@@ -87,6 +101,8 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/dashboard': typeof AppDashboardRoute
   '/my-businesses': typeof AppMyBusinessesRoute
+  '/accounting/journal': typeof AppAccountingJournalRoute
+  '/accounting/reports': typeof AppAccountingReportsRoute
   '/businesses/$slug': typeof AppBusinessesSlugRoute
   '/roadmaps/$businessId': typeof AppRoadmapsBusinessIdRoute
   '/businesses': typeof AppBusinessesIndexRoute
@@ -100,6 +116,8 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/my-businesses': typeof AppMyBusinessesRoute
+  '/_app/accounting/journal': typeof AppAccountingJournalRoute
+  '/_app/accounting/reports': typeof AppAccountingReportsRoute
   '/_app/businesses/$slug': typeof AppBusinessesSlugRoute
   '/_app/roadmaps/$businessId': typeof AppRoadmapsBusinessIdRoute
   '/_app/businesses/': typeof AppBusinessesIndexRoute
@@ -113,6 +131,8 @@ export interface FileRouteTypes {
     | '/register'
     | '/dashboard'
     | '/my-businesses'
+    | '/accounting/journal'
+    | '/accounting/reports'
     | '/businesses/$slug'
     | '/roadmaps/$businessId'
     | '/businesses/'
@@ -124,6 +144,8 @@ export interface FileRouteTypes {
     | '/register'
     | '/dashboard'
     | '/my-businesses'
+    | '/accounting/journal'
+    | '/accounting/reports'
     | '/businesses/$slug'
     | '/roadmaps/$businessId'
     | '/businesses'
@@ -136,6 +158,8 @@ export interface FileRouteTypes {
     | '/register'
     | '/_app/dashboard'
     | '/_app/my-businesses'
+    | '/_app/accounting/journal'
+    | '/_app/accounting/reports'
     | '/_app/businesses/$slug'
     | '/_app/roadmaps/$businessId'
     | '/_app/businesses/'
@@ -221,12 +245,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBusinessesSlugRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/accounting/reports': {
+      id: '/_app/accounting/reports'
+      path: '/accounting/reports'
+      fullPath: '/accounting/reports'
+      preLoaderRoute: typeof AppAccountingReportsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/accounting/journal': {
+      id: '/_app/accounting/journal'
+      path: '/accounting/journal'
+      fullPath: '/accounting/journal'
+      preLoaderRoute: typeof AppAccountingJournalRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppMyBusinessesRoute: typeof AppMyBusinessesRoute
+  AppAccountingJournalRoute: typeof AppAccountingJournalRoute
+  AppAccountingReportsRoute: typeof AppAccountingReportsRoute
   AppBusinessesSlugRoute: typeof AppBusinessesSlugRoute
   AppRoadmapsBusinessIdRoute: typeof AppRoadmapsBusinessIdRoute
   AppBusinessesIndexRoute: typeof AppBusinessesIndexRoute
@@ -236,6 +276,8 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppMyBusinessesRoute: AppMyBusinessesRoute,
+  AppAccountingJournalRoute: AppAccountingJournalRoute,
+  AppAccountingReportsRoute: AppAccountingReportsRoute,
   AppBusinessesSlugRoute: AppBusinessesSlugRoute,
   AppRoadmapsBusinessIdRoute: AppRoadmapsBusinessIdRoute,
   AppBusinessesIndexRoute: AppBusinessesIndexRoute,
