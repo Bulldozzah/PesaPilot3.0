@@ -17,6 +17,7 @@ import { Route as AppWalletPlannerRouteImport } from './routes/_app/wallet-plann
 import { Route as AppSavingsRouteImport } from './routes/_app/savings'
 import { Route as AppProfileRouteImport } from './routes/_app/profile'
 import { Route as AppPersonalRouteImport } from './routes/_app/personal'
+import { Route as AppOnboardingRouteImport } from './routes/_app/onboarding'
 import { Route as AppMyBusinessesRouteImport } from './routes/_app/my-businesses'
 import { Route as AppLendersRouteImport } from './routes/_app/lenders'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
@@ -68,6 +69,11 @@ const AppProfileRoute = AppProfileRouteImport.update({
 const AppPersonalRoute = AppPersonalRouteImport.update({
   id: '/personal',
   path: '/personal',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppOnboardingRoute = AppOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => AppRouteRoute,
 } as any)
 const AppMyBusinessesRoute = AppMyBusinessesRouteImport.update({
@@ -147,6 +153,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/lenders': typeof AppLendersRoute
   '/my-businesses': typeof AppMyBusinessesRoute
+  '/onboarding': typeof AppOnboardingRoute
   '/personal': typeof AppPersonalRoute
   '/profile': typeof AppProfileRoute
   '/savings': typeof AppSavingsRoute
@@ -169,6 +176,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AppDashboardRoute
   '/lenders': typeof AppLendersRoute
   '/my-businesses': typeof AppMyBusinessesRoute
+  '/onboarding': typeof AppOnboardingRoute
   '/personal': typeof AppPersonalRoute
   '/profile': typeof AppProfileRoute
   '/savings': typeof AppSavingsRoute
@@ -193,6 +201,7 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/lenders': typeof AppLendersRoute
   '/_app/my-businesses': typeof AppMyBusinessesRoute
+  '/_app/onboarding': typeof AppOnboardingRoute
   '/_app/personal': typeof AppPersonalRoute
   '/_app/profile': typeof AppProfileRoute
   '/_app/savings': typeof AppSavingsRoute
@@ -217,6 +226,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/lenders'
     | '/my-businesses'
+    | '/onboarding'
     | '/personal'
     | '/profile'
     | '/savings'
@@ -239,6 +249,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/lenders'
     | '/my-businesses'
+    | '/onboarding'
     | '/personal'
     | '/profile'
     | '/savings'
@@ -262,6 +273,7 @@ export interface FileRouteTypes {
     | '/_app/dashboard'
     | '/_app/lenders'
     | '/_app/my-businesses'
+    | '/_app/onboarding'
     | '/_app/personal'
     | '/_app/profile'
     | '/_app/savings'
@@ -337,6 +349,13 @@ declare module '@tanstack/react-router' {
       path: '/personal'
       fullPath: '/personal'
       preLoaderRoute: typeof AppPersonalRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/onboarding': {
+      id: '/_app/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof AppOnboardingRouteImport
       parentRoute: typeof AppRouteRoute
     }
     '/_app/my-businesses': {
@@ -441,6 +460,7 @@ interface AppRouteRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppLendersRoute: typeof AppLendersRoute
   AppMyBusinessesRoute: typeof AppMyBusinessesRoute
+  AppOnboardingRoute: typeof AppOnboardingRoute
   AppPersonalRoute: typeof AppPersonalRoute
   AppProfileRoute: typeof AppProfileRoute
   AppSavingsRoute: typeof AppSavingsRoute
@@ -461,6 +481,7 @@ const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppLendersRoute: AppLendersRoute,
   AppMyBusinessesRoute: AppMyBusinessesRoute,
+  AppOnboardingRoute: AppOnboardingRoute,
   AppPersonalRoute: AppPersonalRoute,
   AppProfileRoute: AppProfileRoute,
   AppSavingsRoute: AppSavingsRoute,
