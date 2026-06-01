@@ -31,6 +31,7 @@ export const Route = createFileRoute("/_app/onboarding")({
   validateSearch: (s: Record<string, unknown>): Search => ({
     templateId: typeof s.templateId === "string" ? s.templateId : undefined,
   }),
+  ssr: false,
   head: () => ({ meta: [{ title: "Onboarding — Pilot-Pesa" }] }),
   component: Onboarding,
 });
