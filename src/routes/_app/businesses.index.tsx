@@ -76,19 +76,9 @@ function Discovery() {
 
   const startBusiness = async (t: Template) => {
     if (!user) { navigate({ to: "/register" }); return; }
-    setStarting(true);
-    const { data, error } = await supabase.from("user_businesses").insert({
-      user_id: user.id,
-      template_id: t.id,
-      name: t.name,
-      description: t.description,
-      currency: t.currency,
-    }).select().single();
-    setStarting(false);
-    if (error) { toast.error(error.message); return; }
-    toast.success(`${t.name} added to your businesses`);
-    navigate({ to: "/roadmaps/$businessId", params: { businessId: data.id } });
+    navigate({ to: "/onboarding", search: { templateId: t.id } });
   };
+
 
   const downloadOverview = (t: Template) => {
     const cat = t.category_id ? catById[t.category_id]?.name ?? "" : "";
