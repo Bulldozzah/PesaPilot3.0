@@ -24,7 +24,7 @@ function AppLayout() {
 
   useEffect(() => {
     if (!user) return;
-    if (location.pathname.startsWith("/profile")) {
+    if (location.pathname.startsWith("/profile") || location.pathname.startsWith("/onboarding")) {
       setProfileChecked(true);
       return;
     }
