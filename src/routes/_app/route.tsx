@@ -1,17 +1,20 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { useAuth } from "@/lib/auth-context";
 import { useNavigate } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_app")({
   component: AppLayout,
 });
 
 function AppLayout() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [profileChecked, setProfileChecked] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -19,7 +22,28 @@ function AppLayout() {
     }
   }, [isAuthenticated, isLoading, navigate]);
 
-  if (isLoading || !isAuthenticated) {
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("completed_onboarding, full_name")
+        .eq("id", user.id)
+        .single();
+      if (cancelled) return;
+      const complete = !!data?.completed_onboarding && !!data?.full_name?.trim();
+      setProfileChecked(true);
+      if (!complete && !location.pathname.startsWith("/profile")) {
+        navigate({ to: "/profile", search: { firstTimeSetup: true }, replace: true });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, location.pathname, navigate]);
+
+  if (isLoading || !isAuthenticated || (user && !profileChecked)) {
     return (
       <div className="grid min-h-screen place-items-center bg-background text-muted-foreground">
         Loading…
