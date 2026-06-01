@@ -65,6 +65,7 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          emoji: string | null
           icon: string | null
           id: string
           name: string
@@ -74,6 +75,7 @@ export type Database = {
         Insert: {
           created_at?: string
           description?: string | null
+          emoji?: string | null
           icon?: string | null
           id?: string
           name: string
@@ -83,6 +85,7 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string | null
+          emoji?: string | null
           icon?: string | null
           id?: string
           name?: string
@@ -176,6 +179,10 @@ export type Database = {
           monthly_profit_max: number | null
           monthly_profit_min: number | null
           name: string
+          overview_content: string | null
+          overview_pdf_url: string | null
+          overview_video_url: string | null
+          overview_web_url: string | null
           slug: string
           startup_cost_max: number | null
           startup_cost_min: number | null
@@ -192,6 +199,10 @@ export type Database = {
           monthly_profit_max?: number | null
           monthly_profit_min?: number | null
           name: string
+          overview_content?: string | null
+          overview_pdf_url?: string | null
+          overview_video_url?: string | null
+          overview_web_url?: string | null
           slug: string
           startup_cost_max?: number | null
           startup_cost_min?: number | null
@@ -208,6 +219,10 @@ export type Database = {
           monthly_profit_max?: number | null
           monthly_profit_min?: number | null
           name?: string
+          overview_content?: string | null
+          overview_pdf_url?: string | null
+          overview_video_url?: string | null
+          overview_web_url?: string | null
           slug?: string
           startup_cost_max?: number | null
           startup_cost_min?: number | null
