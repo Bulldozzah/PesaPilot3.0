@@ -14,16 +14,715 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bank_accounts: {
+        Row: {
+          account_number: string | null
+          balance: number
+          bank_name: string | null
+          created_at: string
+          currency: string | null
+          id: string
+          name: string
+          type: Database["public"]["Enums"]["bank_account_type"]
+          user_business_id: string | null
+          user_id: string
+        }
+        Insert: {
+          account_number?: string | null
+          balance?: number
+          bank_name?: string | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          name: string
+          type?: Database["public"]["Enums"]["bank_account_type"]
+          user_business_id?: string | null
+          user_id: string
+        }
+        Update: {
+          account_number?: string | null
+          balance?: number
+          bank_name?: string | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          name?: string
+          type?: Database["public"]["Enums"]["bank_account_type"]
+          user_business_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_accounts_user_business_id_fkey"
+            columns: ["user_business_id"]
+            isOneToOne: false
+            referencedRelation: "user_businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+          slug: string
+          sort_order: number | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          slug: string
+          sort_order?: number | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
+      business_plans: {
+        Row: {
+          content: Json
+          created_at: string
+          id: string
+          title: string
+          updated_at: string
+          user_business_id: string | null
+          user_id: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          id?: string
+          title: string
+          updated_at?: string
+          user_business_id?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_business_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_plans_user_business_id_fkey"
+            columns: ["user_business_id"]
+            isOneToOne: false
+            referencedRelation: "user_businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_template_steps: {
+        Row: {
+          description: string | null
+          est_days: number | null
+          id: string
+          step_number: number
+          template_id: string
+          title: string
+        }
+        Insert: {
+          description?: string | null
+          est_days?: number | null
+          id?: string
+          step_number: number
+          template_id: string
+          title: string
+        }
+        Update: {
+          description?: string | null
+          est_days?: number | null
+          id?: string
+          step_number?: number
+          template_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_template_steps_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "business_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_templates: {
+        Row: {
+          category_id: string | null
+          created_at: string
+          currency: string | null
+          description: string | null
+          difficulty: Database["public"]["Enums"]["business_difficulty"] | null
+          id: string
+          image_url: string | null
+          monthly_profit_max: number | null
+          monthly_profit_min: number | null
+          name: string
+          slug: string
+          startup_cost_max: number | null
+          startup_cost_min: number | null
+          time_to_profit_months: number | null
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          difficulty?: Database["public"]["Enums"]["business_difficulty"] | null
+          id?: string
+          image_url?: string | null
+          monthly_profit_max?: number | null
+          monthly_profit_min?: number | null
+          name: string
+          slug: string
+          startup_cost_max?: number | null
+          startup_cost_min?: number | null
+          time_to_profit_months?: number | null
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          difficulty?: Database["public"]["Enums"]["business_difficulty"] | null
+          id?: string
+          image_url?: string | null
+          monthly_profit_max?: number | null
+          monthly_profit_min?: number | null
+          name?: string
+          slug?: string
+          startup_cost_max?: number | null
+          startup_cost_min?: number | null
+          time_to_profit_months?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_templates_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "business_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chart_of_accounts: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_personal: boolean
+          name: string
+          type: Database["public"]["Enums"]["account_type"]
+          user_business_id: string | null
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_personal?: boolean
+          name: string
+          type: Database["public"]["Enums"]["account_type"]
+          user_business_id?: string | null
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_personal?: boolean
+          name?: string
+          type?: Database["public"]["Enums"]["account_type"]
+          user_business_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chart_of_accounts_user_business_id_fkey"
+            columns: ["user_business_id"]
+            isOneToOne: false
+            referencedRelation: "user_businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contacts: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          type: Database["public"]["Enums"]["contact_type"]
+          user_business_id: string | null
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          type: Database["public"]["Enums"]["contact_type"]
+          user_business_id?: string | null
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          type?: Database["public"]["Enums"]["contact_type"]
+          user_business_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_user_business_id_fkey"
+            columns: ["user_business_id"]
+            isOneToOne: false
+            referencedRelation: "user_businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journal_entries: {
+        Row: {
+          created_at: string
+          description: string | null
+          entry_date: string
+          id: string
+          reference: string | null
+          user_business_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          entry_date?: string
+          id?: string
+          reference?: string | null
+          user_business_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          entry_date?: string
+          id?: string
+          reference?: string | null
+          user_business_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_entries_user_business_id_fkey"
+            columns: ["user_business_id"]
+            isOneToOne: false
+            referencedRelation: "user_businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journal_lines: {
+        Row: {
+          account_id: string
+          credit: number
+          debit: number
+          description: string | null
+          id: string
+          journal_entry_id: string
+        }
+        Insert: {
+          account_id: string
+          credit?: number
+          debit?: number
+          description?: string | null
+          id?: string
+          journal_entry_id: string
+        }
+        Update: {
+          account_id?: string
+          credit?: number
+          debit?: number
+          description?: string | null
+          id?: string
+          journal_entry_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_lines_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_lines_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lenders: {
+        Row: {
+          country: string
+          created_at: string
+          description: string | null
+          id: string
+          interest_rate_max: number | null
+          interest_rate_min: number | null
+          logo_url: string | null
+          max_loan: number | null
+          min_loan: number | null
+          name: string
+          requirements: string | null
+          type: Database["public"]["Enums"]["lender_type"]
+          website: string | null
+        }
+        Insert: {
+          country?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          interest_rate_max?: number | null
+          interest_rate_min?: number | null
+          logo_url?: string | null
+          max_loan?: number | null
+          min_loan?: number | null
+          name: string
+          requirements?: string | null
+          type?: Database["public"]["Enums"]["lender_type"]
+          website?: string | null
+        }
+        Update: {
+          country?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          interest_rate_max?: number | null
+          interest_rate_min?: number | null
+          logo_url?: string | null
+          max_loan?: number | null
+          min_loan?: number | null
+          name?: string
+          requirements?: string | null
+          type?: Database["public"]["Enums"]["lender_type"]
+          website?: string | null
+        }
+        Relationships: []
+      }
+      personal_transactions: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          transaction_date: string
+          type: Database["public"]["Enums"]["personal_tx_type"]
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          transaction_date?: string
+          type: Database["public"]["Enums"]["personal_tx_type"]
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          transaction_date?: string
+          type?: Database["public"]["Enums"]["personal_tx_type"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          business_name: string | null
+          completed_onboarding: boolean
+          country: string | null
+          created_at: string
+          currency: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          business_name?: string | null
+          completed_onboarding?: boolean
+          country?: string | null
+          created_at?: string
+          currency?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          business_name?: string | null
+          completed_onboarding?: boolean
+          country?: string | null
+          created_at?: string
+          currency?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      regulatory_authorities: {
+        Row: {
+          category: string | null
+          country: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          website: string | null
+        }
+        Insert: {
+          category?: string | null
+          country: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          website?: string | null
+        }
+        Update: {
+          category?: string | null
+          country?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      savings_goals: {
+        Row: {
+          created_at: string
+          current_amount: number
+          id: string
+          name: string
+          target_amount: number
+          target_date: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_amount?: number
+          id?: string
+          name: string
+          target_amount: number
+          target_date?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_amount?: number
+          id?: string
+          name?: string
+          target_amount?: number
+          target_date?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_businesses: {
+        Row: {
+          created_at: string
+          currency: string | null
+          description: string | null
+          id: string
+          name: string
+          started_at: string
+          template_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          started_at?: string
+          template_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          started_at?: string
+          template_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_businesses_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "business_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roadmap_progress: {
+        Row: {
+          completed: boolean
+          completed_at: string | null
+          id: string
+          notes: string | null
+          step_id: string
+          user_business_id: string
+        }
+        Insert: {
+          completed?: boolean
+          completed_at?: string | null
+          id?: string
+          notes?: string | null
+          step_id: string
+          user_business_id: string
+        }
+        Update: {
+          completed?: boolean
+          completed_at?: string | null
+          id?: string
+          notes?: string | null
+          step_id?: string
+          user_business_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roadmap_progress_step_id_fkey"
+            columns: ["step_id"]
+            isOneToOne: false
+            referencedRelation: "business_template_steps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_roadmap_progress_user_business_id_fkey"
+            columns: ["user_business_id"]
+            isOneToOne: false
+            referencedRelation: "user_businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      wallet_budgets: {
+        Row: {
+          amount_planned: number
+          category: string
+          created_at: string
+          id: string
+          month: string
+          user_id: string
+        }
+        Insert: {
+          amount_planned: number
+          category: string
+          created_at?: string
+          id?: string
+          month: string
+          user_id: string
+        }
+        Update: {
+          amount_planned?: number
+          category?: string
+          created_at?: string
+          id?: string
+          month?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      account_type: "asset" | "liability" | "equity" | "income" | "expense"
+      app_role: "admin" | "user"
+      bank_account_type: "checking" | "savings" | "mobile_money" | "cash"
+      business_difficulty: "easy" | "medium" | "hard"
+      contact_type: "vendor" | "customer"
+      lender_type: "bank" | "microfinance" | "sacco" | "digital" | "government"
+      personal_tx_type: "income" | "expense"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +849,14 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      account_type: ["asset", "liability", "equity", "income", "expense"],
+      app_role: ["admin", "user"],
+      bank_account_type: ["checking", "savings", "mobile_money", "cash"],
+      business_difficulty: ["easy", "medium", "hard"],
+      contact_type: ["vendor", "customer"],
+      lender_type: ["bank", "microfinance", "sacco", "digital", "government"],
+      personal_tx_type: ["income", "expense"],
+    },
   },
 } as const
