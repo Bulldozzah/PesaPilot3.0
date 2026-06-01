@@ -27,7 +27,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 
-export const Route = createFileRoute("/_app/my-businesses")({ component: MyBusinessPage });
+export const Route = createFileRoute("/_app/my-businesses")({ component: MyBusinessPage, ssr: false });
 
 type Step = { number: number; title: string; description: string; checklist: string[] };
 
