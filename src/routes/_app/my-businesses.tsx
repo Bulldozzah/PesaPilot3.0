@@ -148,14 +148,25 @@ function MyBusinessPage() {
       if (enriched.length && !selectedId) setSelectedId(enriched[0].id);
       setCountryName(profile?.country ?? "");
       const code = (profile as any)?.country_code as string | undefined;
+      let auth: Authority | null = null;
       if (code) {
-        const { data: auth } = await supabase
+        const { data } = await supabase
           .from("country_authorities")
           .select("*")
           .eq("country_code", code)
           .maybeSingle();
-        setAuthority(auth as Authority | null);
+        auth = (data as Authority | null) ?? null;
       }
+      if (!auth && profile?.country) {
+        const { data } = await supabase
+          .from("country_authorities")
+          .select("*")
+          .ilike("country_name", profile.country)
+          .maybeSingle();
+        auth = (data as Authority | null) ?? null;
+      }
+      setAuthority(auth);
+
     })();
   }, [user]);
 
