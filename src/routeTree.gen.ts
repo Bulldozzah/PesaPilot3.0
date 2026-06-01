@@ -11,7 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as AppRouteImport } from './routes/_app'
+import { Route as AppRouteRouteImport } from './routes/_app/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppWalletPlannerRouteImport } from './routes/_app/wallet-planner'
 import { Route as AppSavingsRouteImport } from './routes/_app/savings'
@@ -41,7 +41,7 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppRoute = AppRouteImport.update({
+const AppRouteRoute = AppRouteRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
@@ -53,87 +53,87 @@ const IndexRoute = IndexRouteImport.update({
 const AppWalletPlannerRoute = AppWalletPlannerRouteImport.update({
   id: '/wallet-planner',
   path: '/wallet-planner',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
 const AppSavingsRoute = AppSavingsRouteImport.update({
   id: '/savings',
   path: '/savings',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
 const AppProfileRoute = AppProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
 const AppPersonalRoute = AppPersonalRouteImport.update({
   id: '/personal',
   path: '/personal',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
 const AppMyBusinessesRoute = AppMyBusinessesRouteImport.update({
   id: '/my-businesses',
   path: '/my-businesses',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
 const AppLendersRoute = AppLendersRouteImport.update({
   id: '/lenders',
   path: '/lenders',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
 const AppContactsRoute = AppContactsRouteImport.update({
   id: '/contacts',
   path: '/contacts',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
 const AppBusinessPlansRoute = AppBusinessPlansRouteImport.update({
   id: '/business-plans',
   path: '/business-plans',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
 const AppBankAccountsRoute = AppBankAccountsRouteImport.update({
   id: '/bank-accounts',
   path: '/bank-accounts',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
 const AppAdminRoute = AppAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
 const AppRoadmapsIndexRoute = AppRoadmapsIndexRouteImport.update({
   id: '/roadmaps/',
   path: '/roadmaps/',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
 const AppBusinessesIndexRoute = AppBusinessesIndexRouteImport.update({
   id: '/businesses/',
   path: '/businesses/',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
 const AppRoadmapsBusinessIdRoute = AppRoadmapsBusinessIdRouteImport.update({
   id: '/roadmaps/$businessId',
   path: '/roadmaps/$businessId',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
 const AppBusinessesSlugRoute = AppBusinessesSlugRouteImport.update({
   id: '/businesses/$slug',
   path: '/businesses/$slug',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
 const AppAccountingReportsRoute = AppAccountingReportsRouteImport.update({
   id: '/accounting/reports',
   path: '/accounting/reports',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
 const AppAccountingJournalRoute = AppAccountingJournalRouteImport.update({
   id: '/accounting/journal',
   path: '/accounting/journal',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AppRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -183,7 +183,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_app': typeof AppRouteWithChildren
+  '/_app': typeof AppRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/_app/admin': typeof AppAdminRoute
@@ -276,7 +276,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AppRoute: typeof AppRouteWithChildren
+  AppRouteRoute: typeof AppRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
 }
@@ -301,7 +301,7 @@ declare module '@tanstack/react-router' {
       id: '/_app'
       path: ''
       fullPath: '/'
-      preLoaderRoute: typeof AppRouteImport
+      preLoaderRoute: typeof AppRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -316,124 +316,124 @@ declare module '@tanstack/react-router' {
       path: '/wallet-planner'
       fullPath: '/wallet-planner'
       preLoaderRoute: typeof AppWalletPlannerRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppRouteRoute
     }
     '/_app/savings': {
       id: '/_app/savings'
       path: '/savings'
       fullPath: '/savings'
       preLoaderRoute: typeof AppSavingsRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppRouteRoute
     }
     '/_app/profile': {
       id: '/_app/profile'
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof AppProfileRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppRouteRoute
     }
     '/_app/personal': {
       id: '/_app/personal'
       path: '/personal'
       fullPath: '/personal'
       preLoaderRoute: typeof AppPersonalRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppRouteRoute
     }
     '/_app/my-businesses': {
       id: '/_app/my-businesses'
       path: '/my-businesses'
       fullPath: '/my-businesses'
       preLoaderRoute: typeof AppMyBusinessesRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppRouteRoute
     }
     '/_app/lenders': {
       id: '/_app/lenders'
       path: '/lenders'
       fullPath: '/lenders'
       preLoaderRoute: typeof AppLendersRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppRouteRoute
     }
     '/_app/dashboard': {
       id: '/_app/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AppDashboardRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppRouteRoute
     }
     '/_app/contacts': {
       id: '/_app/contacts'
       path: '/contacts'
       fullPath: '/contacts'
       preLoaderRoute: typeof AppContactsRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppRouteRoute
     }
     '/_app/business-plans': {
       id: '/_app/business-plans'
       path: '/business-plans'
       fullPath: '/business-plans'
       preLoaderRoute: typeof AppBusinessPlansRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppRouteRoute
     }
     '/_app/bank-accounts': {
       id: '/_app/bank-accounts'
       path: '/bank-accounts'
       fullPath: '/bank-accounts'
       preLoaderRoute: typeof AppBankAccountsRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppRouteRoute
     }
     '/_app/admin': {
       id: '/_app/admin'
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AppAdminRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppRouteRoute
     }
     '/_app/roadmaps/': {
       id: '/_app/roadmaps/'
       path: '/roadmaps'
       fullPath: '/roadmaps/'
       preLoaderRoute: typeof AppRoadmapsIndexRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppRouteRoute
     }
     '/_app/businesses/': {
       id: '/_app/businesses/'
       path: '/businesses'
       fullPath: '/businesses/'
       preLoaderRoute: typeof AppBusinessesIndexRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppRouteRoute
     }
     '/_app/roadmaps/$businessId': {
       id: '/_app/roadmaps/$businessId'
       path: '/roadmaps/$businessId'
       fullPath: '/roadmaps/$businessId'
       preLoaderRoute: typeof AppRoadmapsBusinessIdRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppRouteRoute
     }
     '/_app/businesses/$slug': {
       id: '/_app/businesses/$slug'
       path: '/businesses/$slug'
       fullPath: '/businesses/$slug'
       preLoaderRoute: typeof AppBusinessesSlugRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppRouteRoute
     }
     '/_app/accounting/reports': {
       id: '/_app/accounting/reports'
       path: '/accounting/reports'
       fullPath: '/accounting/reports'
       preLoaderRoute: typeof AppAccountingReportsRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppRouteRoute
     }
     '/_app/accounting/journal': {
       id: '/_app/accounting/journal'
       path: '/accounting/journal'
       fullPath: '/accounting/journal'
       preLoaderRoute: typeof AppAccountingJournalRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppRouteRoute
     }
   }
 }
 
-interface AppRouteChildren {
+interface AppRouteRouteChildren {
   AppAdminRoute: typeof AppAdminRoute
   AppBankAccountsRoute: typeof AppBankAccountsRoute
   AppBusinessPlansRoute: typeof AppBusinessPlansRoute
@@ -453,7 +453,7 @@ interface AppRouteChildren {
   AppRoadmapsIndexRoute: typeof AppRoadmapsIndexRoute
 }
 
-const AppRouteChildren: AppRouteChildren = {
+const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppAdminRoute: AppAdminRoute,
   AppBankAccountsRoute: AppBankAccountsRoute,
   AppBusinessPlansRoute: AppBusinessPlansRoute,
@@ -473,14 +473,26 @@ const AppRouteChildren: AppRouteChildren = {
   AppRoadmapsIndexRoute: AppRoadmapsIndexRoute,
 }
 
-const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
+  AppRouteRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AppRoute: AppRouteWithChildren,
+  AppRouteRoute: AppRouteRouteWithChildren,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
