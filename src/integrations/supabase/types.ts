@@ -588,31 +588,40 @@ export type Database = {
       }
       user_businesses: {
         Row: {
+          budget: number
           created_at: string
           currency: string | null
           description: string | null
+          expected_monthly_profit: number | null
           id: string
           name: string
+          start_date: string | null
           started_at: string
           template_id: string | null
           user_id: string
         }
         Insert: {
+          budget?: number
           created_at?: string
           currency?: string | null
           description?: string | null
+          expected_monthly_profit?: number | null
           id?: string
           name: string
+          start_date?: string | null
           started_at?: string
           template_id?: string | null
           user_id: string
         }
         Update: {
+          budget?: number
           created_at?: string
           currency?: string | null
           description?: string | null
+          expected_monthly_profit?: number | null
           id?: string
           name?: string
+          start_date?: string | null
           started_at?: string
           template_id?: string | null
           user_id?: string
