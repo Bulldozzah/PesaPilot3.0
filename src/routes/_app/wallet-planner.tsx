@@ -254,6 +254,7 @@ function IncomeSection({ items, onChange, userId, month, year, total }: { items:
       const { error } = await supabase.from("personal_income").update({ source: f.source, amount: Number(f.amount), frequency: f.frequency }).eq("id", editing.id);
       if (error) return toast.error(error.message);
     } else {
+      if (!userId) return;
       const { error } = await supabase.from("personal_income").insert({ user_id: userId, source: f.source, amount: Number(f.amount), frequency: f.frequency, month, year });
       if (error) return toast.error(error.message);
     }
