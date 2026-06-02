@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Pencil, Trash2, Plus, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, Building2, Wallet, Banknote } from "lucide-react";
+import { Pencil, Trash2, Plus, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, Building2, Wallet, Banknote, Calendar as CalendarIcon, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { PageHeader } from "@/components/page";
@@ -86,6 +86,7 @@ function BankAccounts() {
   const [txModalOpen, setTxModalOpen] = useState(false);
   const [txAccount, setTxAccount] = useState<BankAccount | null>(null);
   const [txForm, setTxForm] = useState(emptyTxForm);
+  const [accountSearchQuery, setAccountSearchQuery] = useState("");
 
   // Load businesses
   useEffect(() => {
@@ -202,22 +203,35 @@ function BankAccounts() {
   // ---------- Transaction ----------
   const openTx = (a: BankAccount) => {
     setTxAccount(a);
-    setTxForm(emptyTxForm);
+    setTxForm({ ...emptyTxForm, date: new Date().toISOString().slice(0, 10) });
+    setAccountSearchQuery("");
     setTxModalOpen(true);
   };
 
-  const offsetOptions = useMemo(() => {
+  const handleTxTypeChange = (type: TxType) => {
+    setTxForm({ ...txForm, type, offset_account_id: "" });
+    setAccountSearchQuery("");
+  };
+
+  const filteredOffsetOptions = useMemo(() => {
     if (!txAccount) return [];
-    const bankChartIds = new Set(accounts.filter((x) => x.id !== txAccount.id).map((x) => x.chart_account_id));
+    const bankChartIds = new Set(
+      accounts.filter((x) => x.id !== txAccount.id && x.chart_account_id).map((x) => x.chart_account_id as string)
+    );
+    let list: ChartAccount[] = [];
     if (txForm.type === "in") {
-      return chart.filter((c) => ["income", "equity", "liability", "asset"].includes(c.type) && c.id !== txAccount.chart_account_id);
+      list = chart.filter((c) => ["income", "equity", "liability", "asset"].includes(c.type) && c.id !== txAccount.chart_account_id);
+    } else if (txForm.type === "out") {
+      list = chart.filter((c) => ["expense", "asset", "liability"].includes(c.type) && c.id !== txAccount.chart_account_id);
+    } else {
+      list = chart.filter((c) => bankChartIds.has(c.id));
     }
-    if (txForm.type === "out") {
-      return chart.filter((c) => ["expense", "asset", "liability"].includes(c.type) && c.id !== txAccount.chart_account_id);
-    }
-    // transfer
-    return chart.filter((c) => bankChartIds.has(c.id));
-  }, [txForm.type, chart, accounts, txAccount]);
+    const q = accountSearchQuery.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter(
+      (c) => c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q) || c.type.toLowerCase().includes(q)
+    );
+  }, [txForm.type, chart, accounts, txAccount, accountSearchQuery]);
 
   const txValid = () => {
     const amt = parseFloat(txForm.amount) || 0;
@@ -240,7 +254,7 @@ function BankAccounts() {
       const { count } = await supabase
         .from("journal_entries")
         .select("id", { count: "exact", head: true })
-        .eq("user_id", user!.id);
+        .eq("user_business_id", selectedBusinessId);
       reference = `${prefix}-${year}-${String((count ?? 0) + 1).padStart(4, "0")}`;
     }
 
@@ -449,86 +463,205 @@ function BankAccounts() {
 
       {/* Transaction Modal */}
       <Dialog open={txModalOpen} onOpenChange={setTxModalOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>New transaction · {txAccount?.name}</DialogTitle>
+            <DialogTitle>Add Transaction</DialogTitle>
+            <p className="text-sm text-muted-foreground">
+              {txAccount?.name} ({txAccount ? TYPE_LABEL[txAccount.type] : ""})
+            </p>
           </DialogHeader>
-          <div className="space-y-3">
-            <div className="grid grid-cols-3 gap-2">
-              {([
-                { v: "in", label: "Money In", icon: <ArrowDownLeft className="h-4 w-4" /> },
-                { v: "out", label: "Money Out", icon: <ArrowUpRight className="h-4 w-4" /> },
-                { v: "transfer", label: "Transfer", icon: <ArrowLeftRight className="h-4 w-4" /> },
-              ] as const).map((opt) => (
-                <button
-                  key={opt.v}
-                  onClick={() => setTxForm({ ...txForm, type: opt.v, offset_account_id: "" })}
-                  className={`flex flex-col items-center gap-1 rounded-lg border p-3 text-xs font-medium transition-all ${
-                    txForm.type === opt.v ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:bg-muted"
-                  }`}
-                >
-                  {opt.icon}
-                  {opt.label}
-                </button>
-              ))}
+          <div className="space-y-4">
+            {/* 1. Transaction Type */}
+            <div>
+              <Label className="mb-2 block">Transaction Type *</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {([
+                  { v: "in", label: "Money In", sub: "Deposit", icon: <ArrowDownLeft className="h-5 w-5" />, color: "green" },
+                  { v: "out", label: "Money Out", sub: "Payment", icon: <ArrowUpRight className="h-5 w-5" />, color: "red" },
+                  { v: "transfer", label: "Transfer", sub: "Bank to Bank", icon: <ArrowLeftRight className="h-5 w-5" />, color: "blue" },
+                ] as const).map((opt) => {
+                  const selected = txForm.type === opt.v;
+                  const ring =
+                    opt.color === "green"
+                      ? selected
+                        ? "border-green-500 bg-green-500/10 text-green-700"
+                        : "border-border hover:bg-muted"
+                      : opt.color === "red"
+                      ? selected
+                        ? "border-red-500 bg-red-500/10 text-red-700"
+                        : "border-border hover:bg-muted"
+                      : selected
+                      ? "border-blue-500 bg-blue-500/10 text-blue-700"
+                      : "border-border hover:bg-muted";
+                  return (
+                    <button
+                      key={opt.v}
+                      onClick={() => handleTxTypeChange(opt.v)}
+                      className={`flex flex-col items-center gap-1 rounded-lg border-2 p-3 text-xs font-medium transition-all ${ring}`}
+                    >
+                      {opt.icon}
+                      <div className="font-semibold">{opt.label}</div>
+                      <div className="text-[10px] opacity-70">{opt.sub}</div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
+
+            {/* 2. Amount */}
             <div>
               <Label>Amount *</Label>
-              <Input type="number" min="0" step="0.01" value={txForm.amount} onChange={(e) => setTxForm({ ...txForm, amount: e.target.value })} />
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                value={txForm.amount}
+                onChange={(e) => setTxForm({ ...txForm, amount: e.target.value })}
+                placeholder="0.00"
+              />
+              {(txForm.type === "out" || txForm.type === "transfer") && txAccount && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Available Balance: <b>{formatMoney(Number(txAccount.current_balance), txAccount.currency)}</b>
+                </p>
+              )}
               {txForm.type !== "in" && txAccount && parseFloat(txForm.amount) > Number(txAccount.current_balance) && (
-                <p className="mt-1 text-xs text-amber-600">⚠ Amount exceeds available balance ({formatMoney(Number(txAccount.current_balance), txAccount.currency)})</p>
+                <p className="mt-1 text-xs text-amber-600">⚠ Amount exceeds available balance</p>
               )}
             </div>
+
+            {/* 3. Counter Account */}
             <div>
-              <Label>{txForm.type === "transfer" ? "Destination Account *" : "Counter Account *"}</Label>
+              <Label>
+                {txForm.type === "in"
+                  ? "Source Account (Credit) *"
+                  : txForm.type === "out"
+                  ? "Destination Account (Debit) *"
+                  : "Destination Account *"}
+              </Label>
+              <p className="mb-2 text-xs text-muted-foreground">
+                {txForm.type === "in"
+                  ? "Where is the money coming from? (Income, Equity, Liability, Asset)"
+                  : txForm.type === "out"
+                  ? "What is the money being used for? (Expense, Asset, Liability)"
+                  : "Which bank account is receiving the transfer?"}
+              </p>
+              <div className="relative mb-2">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  className="pl-8"
+                  placeholder="Search by name, code, or type…"
+                  value={accountSearchQuery}
+                  onChange={(e) => setAccountSearchQuery(e.target.value)}
+                />
+              </div>
               <Select value={txForm.offset_account_id} onValueChange={(v) => setTxForm({ ...txForm, offset_account_id: v })}>
                 <SelectTrigger><SelectValue placeholder="Select account" /></SelectTrigger>
                 <SelectContent>
-                  {offsetOptions.length === 0 ? (
+                  {filteredOffsetOptions.length === 0 ? (
                     <div className="px-3 py-2 text-xs text-muted-foreground">No eligible accounts</div>
-                  ) : offsetOptions.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      <span className="font-mono text-xs">{c.code}</span> · {c.name} <span className="text-xs text-muted-foreground">({c.type})</span>
-                    </SelectItem>
-                  ))}
+                  ) : (
+                    filteredOffsetOptions.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        <span className="font-mono text-xs">{c.code}</span> - {c.name}{" "}
+                        <span className="text-xs text-muted-foreground capitalize">[{c.type}]</span>
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>
+
+            {/* 4. Date + 5. Reference */}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>Date *</Label>
-                <Input type="date" value={txForm.date} onChange={(e) => setTxForm({ ...txForm, date: e.target.value })} />
+                <div className="relative">
+                  <CalendarIcon className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="date"
+                    className="pl-8"
+                    value={txForm.date}
+                    onChange={(e) => setTxForm({ ...txForm, date: e.target.value })}
+                  />
+                </div>
               </div>
               <div>
-                <Label>Reference #</Label>
-                <Input value={txForm.reference} onChange={(e) => setTxForm({ ...txForm, reference: e.target.value })} placeholder="Auto-generated" />
+                <Label>Reference # (Optional)</Label>
+                <Input
+                  className="bg-muted/50"
+                  value={txForm.reference}
+                  onChange={(e) => setTxForm({ ...txForm, reference: e.target.value })}
+                  placeholder="Auto-generated if left blank"
+                />
+                <p className="mt-1 text-[10px] text-muted-foreground">
+                  Leave blank to auto-generate (e.g., {txForm.type === "transfer" ? "TRF" : "TXN"}-{new Date().getFullYear()}-0001)
+                </p>
               </div>
             </div>
+
+            {/* 6. Description */}
             <div>
-              <Label>Description * (min 3 chars)</Label>
-              <Textarea value={txForm.memo} onChange={(e) => setTxForm({ ...txForm, memo: e.target.value })} rows={2} />
+              <Label>Description *</Label>
+              <Textarea
+                value={txForm.memo}
+                onChange={(e) => setTxForm({ ...txForm, memo: e.target.value })}
+                rows={2}
+                placeholder="e.g., Customer payment for Invoice #123"
+                className={txForm.memo.length > 0 && txForm.memo.trim().length < 3 ? "border-destructive" : ""}
+              />
+              {txForm.memo.length > 0 && txForm.memo.trim().length < 3 && (
+                <p className="mt-1 text-xs text-destructive">Description must be at least 3 characters</p>
+              )}
             </div>
 
-            {/* Preview */}
-            {txValid() && (
+            {/* Live Journal Entry Preview */}
+            {txForm.type && txAccount && (
               <div className="rounded-lg border border-border bg-muted/40 p-3 text-xs">
-                <div className="mb-1 font-semibold text-foreground">Journal Entry Preview</div>
-                <div className="font-mono">
-                  <div>Debit:&nbsp;&nbsp;{previewDebitName()} &nbsp;&nbsp; {formatMoney(parseFloat(txForm.amount), txAccount?.currency)}</div>
-                  <div>Credit: {previewCreditName()} &nbsp;&nbsp; {formatMoney(parseFloat(txForm.amount), txAccount?.currency)}</div>
+                <div className="mb-2 font-semibold text-foreground">Journal Entry Preview</div>
+                <div className="space-y-1 font-mono">
+                  <div className="flex justify-between">
+                    <span>Debit: {previewDebitName() || "(Select account)"}</span>
+                    <span className="font-medium text-green-600">
+                      {formatMoney(parseFloat(txForm.amount) || 0, txAccount.currency)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Credit: {previewCreditName() || "(Select account)"}</span>
+                    <span className="font-medium text-red-600">
+                      {formatMoney(parseFloat(txForm.amount) || 0, txAccount.currency)}
+                    </span>
+                  </div>
                 </div>
               </div>
             )}
 
-            {!txValid() && (
+            {/* Validation Summary */}
+            {!txValid() && txForm.type && (
               <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-700">
-                Required: amount &gt; 0, counter account, date, description (3+ chars).
+                <p className="mb-1 font-medium">Please complete all required fields:</p>
+                <ul className="list-inside list-disc space-y-0.5 text-[11px]">
+                  {!txAccount?.chart_account_id && <li>Bank account not linked to Chart of Accounts (contact support)</li>}
+                  {!txForm.offset_account_id && <li>Select counter account</li>}
+                  {(!txForm.amount || parseFloat(txForm.amount) <= 0) && <li>Enter valid amount</li>}
+                  {(!txForm.memo || txForm.memo.trim().length < 3) && <li>Enter description (min 3 chars)</li>}
+                  {!txForm.date && <li>Select date</li>}
+                </ul>
               </div>
             )}
 
-            <Button disabled={!txValid()} onClick={saveTx} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
-              Record Transaction
-            </Button>
+            {/* Footer */}
+            <div className="flex gap-2 pt-2">
+              <Button variant="outline" onClick={() => setTxModalOpen(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button
+                disabled={!txValid()}
+                onClick={saveTx}
+                className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                Record Transaction
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
