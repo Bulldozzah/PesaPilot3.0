@@ -27,10 +27,10 @@ import { Route as AppBankAccountsRouteImport } from './routes/_app/bank-accounts
 import { Route as AppAdminRouteImport } from './routes/_app/admin'
 import { Route as AppRoadmapsIndexRouteImport } from './routes/_app/roadmaps.index'
 import { Route as AppBusinessesIndexRouteImport } from './routes/_app/businesses.index'
+import { Route as AppAccountingIndexRouteImport } from './routes/_app/accounting/index'
 import { Route as AppRoadmapsBusinessIdRouteImport } from './routes/_app/roadmaps.$businessId'
 import { Route as AppBusinessesSlugRouteImport } from './routes/_app/businesses.$slug'
 import { Route as AppAccountingReportsRouteImport } from './routes/_app/accounting/reports'
-import { Route as AppAccountingJournalRouteImport } from './routes/_app/accounting/journal'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -121,6 +121,11 @@ const AppBusinessesIndexRoute = AppBusinessesIndexRouteImport.update({
   path: '/businesses/',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppAccountingIndexRoute = AppAccountingIndexRouteImport.update({
+  id: '/accounting/',
+  path: '/accounting/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 const AppRoadmapsBusinessIdRoute = AppRoadmapsBusinessIdRouteImport.update({
   id: '/roadmaps/$businessId',
   path: '/roadmaps/$businessId',
@@ -134,11 +139,6 @@ const AppBusinessesSlugRoute = AppBusinessesSlugRouteImport.update({
 const AppAccountingReportsRoute = AppAccountingReportsRouteImport.update({
   id: '/accounting/reports',
   path: '/accounting/reports',
-  getParentRoute: () => AppRouteRoute,
-} as any)
-const AppAccountingJournalRoute = AppAccountingJournalRouteImport.update({
-  id: '/accounting/journal',
-  path: '/accounting/journal',
   getParentRoute: () => AppRouteRoute,
 } as any)
 
@@ -158,10 +158,10 @@ export interface FileRoutesByFullPath {
   '/profile': typeof AppProfileRoute
   '/savings': typeof AppSavingsRoute
   '/wallet-planner': typeof AppWalletPlannerRoute
-  '/accounting/journal': typeof AppAccountingJournalRoute
   '/accounting/reports': typeof AppAccountingReportsRoute
   '/businesses/$slug': typeof AppBusinessesSlugRoute
   '/roadmaps/$businessId': typeof AppRoadmapsBusinessIdRoute
+  '/accounting/': typeof AppAccountingIndexRoute
   '/businesses/': typeof AppBusinessesIndexRoute
   '/roadmaps/': typeof AppRoadmapsIndexRoute
 }
@@ -181,10 +181,10 @@ export interface FileRoutesByTo {
   '/profile': typeof AppProfileRoute
   '/savings': typeof AppSavingsRoute
   '/wallet-planner': typeof AppWalletPlannerRoute
-  '/accounting/journal': typeof AppAccountingJournalRoute
   '/accounting/reports': typeof AppAccountingReportsRoute
   '/businesses/$slug': typeof AppBusinessesSlugRoute
   '/roadmaps/$businessId': typeof AppRoadmapsBusinessIdRoute
+  '/accounting': typeof AppAccountingIndexRoute
   '/businesses': typeof AppBusinessesIndexRoute
   '/roadmaps': typeof AppRoadmapsIndexRoute
 }
@@ -206,10 +206,10 @@ export interface FileRoutesById {
   '/_app/profile': typeof AppProfileRoute
   '/_app/savings': typeof AppSavingsRoute
   '/_app/wallet-planner': typeof AppWalletPlannerRoute
-  '/_app/accounting/journal': typeof AppAccountingJournalRoute
   '/_app/accounting/reports': typeof AppAccountingReportsRoute
   '/_app/businesses/$slug': typeof AppBusinessesSlugRoute
   '/_app/roadmaps/$businessId': typeof AppRoadmapsBusinessIdRoute
+  '/_app/accounting/': typeof AppAccountingIndexRoute
   '/_app/businesses/': typeof AppBusinessesIndexRoute
   '/_app/roadmaps/': typeof AppRoadmapsIndexRoute
 }
@@ -231,10 +231,10 @@ export interface FileRouteTypes {
     | '/profile'
     | '/savings'
     | '/wallet-planner'
-    | '/accounting/journal'
     | '/accounting/reports'
     | '/businesses/$slug'
     | '/roadmaps/$businessId'
+    | '/accounting/'
     | '/businesses/'
     | '/roadmaps/'
   fileRoutesByTo: FileRoutesByTo
@@ -254,10 +254,10 @@ export interface FileRouteTypes {
     | '/profile'
     | '/savings'
     | '/wallet-planner'
-    | '/accounting/journal'
     | '/accounting/reports'
     | '/businesses/$slug'
     | '/roadmaps/$businessId'
+    | '/accounting'
     | '/businesses'
     | '/roadmaps'
   id:
@@ -278,10 +278,10 @@ export interface FileRouteTypes {
     | '/_app/profile'
     | '/_app/savings'
     | '/_app/wallet-planner'
-    | '/_app/accounting/journal'
     | '/_app/accounting/reports'
     | '/_app/businesses/$slug'
     | '/_app/roadmaps/$businessId'
+    | '/_app/accounting/'
     | '/_app/businesses/'
     | '/_app/roadmaps/'
   fileRoutesById: FileRoutesById
@@ -421,6 +421,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBusinessesIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/accounting/': {
+      id: '/_app/accounting/'
+      path: '/accounting'
+      fullPath: '/accounting/'
+      preLoaderRoute: typeof AppAccountingIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/_app/roadmaps/$businessId': {
       id: '/_app/roadmaps/$businessId'
       path: '/roadmaps/$businessId'
@@ -442,13 +449,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAccountingReportsRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/_app/accounting/journal': {
-      id: '/_app/accounting/journal'
-      path: '/accounting/journal'
-      fullPath: '/accounting/journal'
-      preLoaderRoute: typeof AppAccountingJournalRouteImport
-      parentRoute: typeof AppRouteRoute
-    }
   }
 }
 
@@ -465,10 +465,10 @@ interface AppRouteRouteChildren {
   AppProfileRoute: typeof AppProfileRoute
   AppSavingsRoute: typeof AppSavingsRoute
   AppWalletPlannerRoute: typeof AppWalletPlannerRoute
-  AppAccountingJournalRoute: typeof AppAccountingJournalRoute
   AppAccountingReportsRoute: typeof AppAccountingReportsRoute
   AppBusinessesSlugRoute: typeof AppBusinessesSlugRoute
   AppRoadmapsBusinessIdRoute: typeof AppRoadmapsBusinessIdRoute
+  AppAccountingIndexRoute: typeof AppAccountingIndexRoute
   AppBusinessesIndexRoute: typeof AppBusinessesIndexRoute
   AppRoadmapsIndexRoute: typeof AppRoadmapsIndexRoute
 }
@@ -486,10 +486,10 @@ const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppProfileRoute: AppProfileRoute,
   AppSavingsRoute: AppSavingsRoute,
   AppWalletPlannerRoute: AppWalletPlannerRoute,
-  AppAccountingJournalRoute: AppAccountingJournalRoute,
   AppAccountingReportsRoute: AppAccountingReportsRoute,
   AppBusinessesSlugRoute: AppBusinessesSlugRoute,
   AppRoadmapsBusinessIdRoute: AppRoadmapsBusinessIdRoute,
+  AppAccountingIndexRoute: AppAccountingIndexRoute,
   AppBusinessesIndexRoute: AppBusinessesIndexRoute,
   AppRoadmapsIndexRoute: AppRoadmapsIndexRoute,
 }
@@ -507,3 +507,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
