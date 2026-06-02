@@ -86,6 +86,7 @@ function BankAccounts() {
   const [txModalOpen, setTxModalOpen] = useState(false);
   const [txAccount, setTxAccount] = useState<BankAccount | null>(null);
   const [txForm, setTxForm] = useState(emptyTxForm);
+  const [accountSearchQuery, setAccountSearchQuery] = useState("");
 
   // Load businesses
   useEffect(() => {
