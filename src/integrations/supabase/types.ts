@@ -16,37 +16,52 @@ export type Database = {
     Tables: {
       bank_accounts: {
         Row: {
+          account_code: string | null
           account_number: string | null
           balance: number
           bank_name: string | null
+          chart_account_id: string | null
           created_at: string
           currency: string | null
+          current_balance: number
           id: string
+          is_active: boolean
           name: string
+          notes: string | null
           type: Database["public"]["Enums"]["bank_account_type"]
           user_business_id: string | null
           user_id: string
         }
         Insert: {
+          account_code?: string | null
           account_number?: string | null
           balance?: number
           bank_name?: string | null
+          chart_account_id?: string | null
           created_at?: string
           currency?: string | null
+          current_balance?: number
           id?: string
+          is_active?: boolean
           name: string
+          notes?: string | null
           type?: Database["public"]["Enums"]["bank_account_type"]
           user_business_id?: string | null
           user_id: string
         }
         Update: {
+          account_code?: string | null
           account_number?: string | null
           balance?: number
           bank_name?: string | null
+          chart_account_id?: string | null
           created_at?: string
           currency?: string | null
+          current_balance?: number
           id?: string
+          is_active?: boolean
           name?: string
+          notes?: string | null
           type?: Database["public"]["Enums"]["bank_account_type"]
           user_business_id?: string | null
           user_id?: string
@@ -243,6 +258,7 @@ export type Database = {
           code: string
           created_at: string
           id: string
+          is_active: boolean
           is_personal: boolean
           name: string
           type: Database["public"]["Enums"]["account_type"]
@@ -253,6 +269,7 @@ export type Database = {
           code: string
           created_at?: string
           id?: string
+          is_active?: boolean
           is_personal?: boolean
           name: string
           type: Database["public"]["Enums"]["account_type"]
@@ -263,6 +280,7 @@ export type Database = {
           code?: string
           created_at?: string
           id?: string
+          is_active?: boolean
           is_personal?: boolean
           name?: string
           type?: Database["public"]["Enums"]["account_type"]
