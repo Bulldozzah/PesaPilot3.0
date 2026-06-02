@@ -783,7 +783,7 @@ function ChartOfAccountsTab({
                   const bal = balances.get(a.id) ?? 0;
                   const credit = isCreditNormal(g.type);
                   return (
-                    <div key={a.id} className={`flex items-center justify-between border-b border-border/30 px-4 py-2 text-sm ${a.chart_account_id ? "" : ""}`}>
+                    <div key={a.id} className="flex items-center justify-between border-b border-border/30 px-4 py-2 text-sm">
                       <div className="flex items-center gap-3">
                         <span className="font-mono text-xs text-muted-foreground w-12">{a.code}</span>
                         <span>{a.name}</span>
