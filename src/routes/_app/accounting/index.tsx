@@ -2,8 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
-  Scale, FileText, List, BookOpen, Plus, Trash2, Check,
-  Upload, X, ArrowUp, ArrowDown,
+  Scale, FileText, List, BookOpen, Plus, Trash2, Check, Upload, X,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
