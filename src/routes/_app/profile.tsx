@@ -93,27 +93,22 @@ function Profile() {
     }
     setSaving(true);
     const fullPhone = phoneWithoutPrefix ? `${phonePrefix} ${phoneWithoutPrefix.trim()}` : "";
-    // Ensure token is fresh before write (avoids JWT expired on idle tabs).
-    {
-      const { data: s } = await supabase.auth.getSession();
-      const expSec = s.session?.expires_at ?? 0;
-      const nowSec = Math.floor(Date.now() / 1000);
-      if (s.session && expSec - nowSec < 60) {
-        await supabase.auth.refreshSession();
-      }
+    // Always refresh the session before write to avoid JWT expired on idle tabs.
+    await supabase.auth.refreshSession().catch(() => undefined);
+    const payload = {
+      full_name: fullName.trim(),
+      country: country.name,
+      country_code: country.code,
+      currency,
+      phone: fullPhone,
+      business_name: businessName.trim() || null,
+      completed_onboarding: true,
+    };
+    let { error } = await supabase.from("profiles").update(payload).eq("id", user.id);
+    if (error && /jwt|expired|PGRST303/i.test(error.message)) {
+      await supabase.auth.refreshSession();
+      ({ error } = await supabase.from("profiles").update(payload).eq("id", user.id));
     }
-    const { error } = await supabase
-      .from("profiles")
-      .update({
-        full_name: fullName.trim(),
-        country: country.name,
-        country_code: country.code,
-        currency,
-        phone: fullPhone,
-        business_name: businessName.trim() || null,
-        completed_onboarding: true,
-      })
-      .eq("id", user.id);
     setSaving(false);
     if (error) return toast.error(error.message);
     try {
