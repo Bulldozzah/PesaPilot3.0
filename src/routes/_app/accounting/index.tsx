@@ -633,11 +633,25 @@ function ChartOfAccountsTab({
     if (!businessId) return;
     const subs = DEFAULT_SUBCATEGORIES.map((s) => ({ ...s, user_business_id: businessId, user_id: userId }));
     await supabase.from("account_subcategories").upsert(subs, { onConflict: "user_business_id,account_type,name" });
-    const accs = DEFAULT_CHART_OF_ACCOUNTS.map((a) => ({
-      user_id: userId, user_business_id: businessId,
-      code: a.code, name: a.name, type: TYPE_TO_ENUM[a.account_type] as any,
-      account_type: a.account_type, subcategory: a.subcategory, is_active: true,
-    }));
+    // Fetch existing codes to avoid duplicates
+    const { data: existing } = await supabase
+      .from("chart_of_accounts")
+      .select("code")
+      .eq("user_business_id", businessId);
+    const existingCodes = new Set((existing ?? []).map((r: any) => r.code));
+    // Dedupe defaults by code, then drop any already in DB
+    const seen = new Set<string>();
+    const accs = DEFAULT_CHART_OF_ACCOUNTS
+      .filter((a) => {
+        if (seen.has(a.code) || existingCodes.has(a.code)) return false;
+        seen.add(a.code); return true;
+      })
+      .map((a) => ({
+        user_id: userId, user_business_id: businessId,
+        code: a.code, name: a.name, type: TYPE_TO_ENUM[a.account_type] as any,
+        account_type: a.account_type, subcategory: a.subcategory, is_active: true,
+      }));
+    if (accs.length === 0) { toast.info("Chart of accounts already initialized"); return; }
     const { error } = await supabase.from("chart_of_accounts").insert(accs);
     if (error) toast.error(error.message);
     else { toast.success(`Created ${accs.length} accounts and ${subs.length} subcategories`); onChange(); }
