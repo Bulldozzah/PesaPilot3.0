@@ -31,12 +31,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const hydrate = async () => {
       const { data } = await supabase.auth.getSession();
       let s = data.session;
-      // If token is expired or about to expire (<60s), refresh proactively.
+      // Refresh if token expires within 5 minutes (handles long idle / sleep)
       const expSec = s?.expires_at ?? 0;
       const nowSec = Math.floor(Date.now() / 1000);
-      if (s && expSec - nowSec < 60) {
+      if (s && expSec - nowSec < 300) {
         const { data: refreshed } = await supabase.auth.refreshSession();
-        s = refreshed.session ?? null;
+        s = refreshed.session ?? s;
       }
       setSession(s);
       setUser(s?.user ?? null);
