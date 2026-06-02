@@ -86,7 +86,7 @@ export const DEFAULT_CHART_OF_ACCOUNTS: DefaultAccount[] = [
   { code: "1200", name: "Inventory (Raw Materials, WIP, Finished Goods)", account_type: "Asset", subcategory: "Current Assets" },
   { code: "1210", name: "Raw Materials", account_type: "Asset", subcategory: "Current Assets" },
   { code: "1310", name: "INV - Reserved", account_type: "Asset", subcategory: "Current Assets" },
-  { code: "1340", name: "INV - Reserved 2", account_type: "Asset", subcategory: "Current Assets" },
+  { code: "1340", name: "INV - Reserved", account_type: "Asset", subcategory: "Current Assets" },
   { code: "1320", name: "INV - Work-in-Progress", account_type: "Asset", subcategory: "Current Assets" },
   { code: "1330", name: "INV - Finished Goods", account_type: "Asset", subcategory: "Current Assets" },
   { code: "1350", name: "INV - Unbilled Cost & Fees", account_type: "Asset", subcategory: "Current Assets" },
@@ -195,8 +195,6 @@ export const DEFAULT_CHART_OF_ACCOUNTS: DefaultAccount[] = [
   { code: "5040", name: "COGS - PRODUCT 4", account_type: "COGS", subcategory: "Direct Costs" },
   { code: "5700", name: "Freight", account_type: "COGS", subcategory: "Direct Costs" },
   { code: "5800", name: "Inventory Adjustments", account_type: "COGS", subcategory: "Inventory" },
-  { code: "5900", name: "Purchase Returns and Allowances", account_type: "COGS", subcategory: "Contra COGS" },
-  // Expenses
   { code: "5900", name: "Purchase Returns and Allowances", account_type: "COGS", subcategory: "Contra COGS" },
   { code: "5950", name: "Reserved", account_type: "COGS", subcategory: "Direct Costs" },
   // Expenses
