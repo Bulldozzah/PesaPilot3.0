@@ -196,8 +196,6 @@ export const DEFAULT_CHART_OF_ACCOUNTS: DefaultAccount[] = [
   { code: "5700", name: "Freight", account_type: "COGS", subcategory: "Direct Costs" },
   { code: "5800", name: "Inventory Adjustments", account_type: "COGS", subcategory: "Inventory" },
   { code: "5900", name: "Purchase Returns and Allowances", account_type: "COGS", subcategory: "Contra COGS" },
-  // Expenses
-  { code: "5900", name: "Purchase Returns and Allowances", account_type: "COGS", subcategory: "Contra COGS" },
   { code: "5950", name: "Reserved", account_type: "COGS", subcategory: "Direct Costs" },
   // Expenses
   { code: "6010", name: "Advertising Expense", account_type: "Expense", subcategory: "Operating Expenses" },
