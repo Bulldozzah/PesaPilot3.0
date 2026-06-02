@@ -197,6 +197,9 @@ export const DEFAULT_CHART_OF_ACCOUNTS: DefaultAccount[] = [
   { code: "5800", name: "Inventory Adjustments", account_type: "COGS", subcategory: "Inventory" },
   { code: "5900", name: "Purchase Returns and Allowances", account_type: "COGS", subcategory: "Contra COGS" },
   // Expenses
+  { code: "5900", name: "Purchase Returns and Allowances", account_type: "COGS", subcategory: "Contra COGS" },
+  { code: "5950", name: "Reserved", account_type: "COGS", subcategory: "Direct Costs" },
+  // Expenses
   { code: "6010", name: "Advertising Expense", account_type: "Expense", subcategory: "Operating Expenses" },
   { code: "6050", name: "Amortization Expense", account_type: "Expense", subcategory: "Operating Expenses" },
   { code: "6100", name: "Auto Expense", account_type: "Expense", subcategory: "Operating Expenses" },
@@ -217,6 +220,15 @@ export const DEFAULT_CHART_OF_ACCOUNTS: DefaultAccount[] = [
   { code: "6870", name: "Maintenance Expense", account_type: "Expense", subcategory: "Operating Expenses" },
   { code: "6900", name: "Meals and Entertainment", account_type: "Expense", subcategory: "Operating Expenses" },
   { code: "6950", name: "Office Expense", account_type: "Expense", subcategory: "Operating Expenses" },
+  { code: "7000", name: "Payroll Taxes", account_type: "Expense", subcategory: "Operating Expenses" },
+  { code: "7050", name: "Printing", account_type: "Expense", subcategory: "Operating Expenses" },
+  { code: "7150", name: "Postage", account_type: "Expense", subcategory: "Operating Expenses" },
+  { code: "7200", name: "Rent", account_type: "Expense", subcategory: "Operating Expenses" },
+  { code: "7250", name: "Repairs Expense", account_type: "Expense", subcategory: "Operating Expenses" },
+  { code: "7300", name: "Salaries Expense", account_type: "Expense", subcategory: "Operating Expenses" },
+  { code: "7350", name: "Supplies Expense", account_type: "Expense", subcategory: "Operating Expenses" },
+  { code: "7400", name: "Taxes - FIT Expense", account_type: "Expense", subcategory: "Operating Expenses" },
+  { code: "7500", name: "Utilities Expense", account_type: "Expense", subcategory: "Operating Expenses" },
   // Other Income / Other Expense
   { code: "7900", name: "Gain/Loss on Sale of Assets", account_type: "Other Income", subcategory: "Non-Operating Income" },
 ];
