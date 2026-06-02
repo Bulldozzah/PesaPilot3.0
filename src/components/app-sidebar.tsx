@@ -27,7 +27,7 @@ const sections = [
   {
     label: "Business Finance",
     items: [
-      { to: "/accounting/journal", icon: LineChart, title: "Journal Entries" },
+      { to: "/accounting", icon: LineChart, title: "Accounting" },
       { to: "/accounting/reports", icon: LineChart, title: "Reports" },
       { to: "/bank-accounts", icon: Landmark, title: "Bank Accounts" },
       { to: "/contacts", icon: Users, title: "Vendors & Customers" },

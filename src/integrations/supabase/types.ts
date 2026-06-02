@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_subcategories: {
+        Row: {
+          account_type: string
+          created_at: string
+          display_order: number
+          id: string
+          is_system: boolean
+          name: string
+          user_business_id: string
+          user_id: string
+        }
+        Insert: {
+          account_type: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_system?: boolean
+          name: string
+          user_business_id: string
+          user_id: string
+        }
+        Update: {
+          account_type?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_system?: boolean
+          name?: string
+          user_business_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bank_accounts: {
         Row: {
           account_code: string | null
@@ -255,34 +288,40 @@ export type Database = {
       }
       chart_of_accounts: {
         Row: {
+          account_type: string | null
           code: string
           created_at: string
           id: string
           is_active: boolean
           is_personal: boolean
           name: string
+          subcategory: string | null
           type: Database["public"]["Enums"]["account_type"]
           user_business_id: string | null
           user_id: string
         }
         Insert: {
+          account_type?: string | null
           code: string
           created_at?: string
           id?: string
           is_active?: boolean
           is_personal?: boolean
           name: string
+          subcategory?: string | null
           type: Database["public"]["Enums"]["account_type"]
           user_business_id?: string | null
           user_id: string
         }
         Update: {
+          account_type?: string | null
           code?: string
           created_at?: string
           id?: string
           is_active?: boolean
           is_personal?: boolean
           name?: string
+          subcategory?: string | null
           type?: Database["public"]["Enums"]["account_type"]
           user_business_id?: string | null
           user_id?: string
@@ -371,13 +410,48 @@ export type Database = {
         }
         Relationships: []
       }
+      customers: {
+        Row: {
+          created_at: string
+          customer_name: string
+          email: string | null
+          id: string
+          is_active: boolean
+          phone: string | null
+          user_business_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_name: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          phone?: string | null
+          user_business_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_name?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          phone?: string | null
+          user_business_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       journal_entries: {
         Row: {
           created_at: string
           description: string | null
           entry_date: string
           id: string
+          is_posted: boolean
           reference: string | null
+          updated_at: string
           user_business_id: string | null
           user_id: string
         }
@@ -386,7 +460,9 @@ export type Database = {
           description?: string | null
           entry_date?: string
           id?: string
+          is_posted?: boolean
           reference?: string | null
+          updated_at?: string
           user_business_id?: string | null
           user_id: string
         }
@@ -395,7 +471,9 @@ export type Database = {
           description?: string | null
           entry_date?: string
           id?: string
+          is_posted?: boolean
           reference?: string | null
+          updated_at?: string
           user_business_id?: string | null
           user_id?: string
         }
@@ -413,26 +491,41 @@ export type Database = {
         Row: {
           account_id: string
           credit: number
+          customer_id: string | null
           debit: number
           description: string | null
           id: string
           journal_entry_id: string
+          memo: string | null
+          tax_amount: number
+          transaction_type: string | null
+          vendor_id: string | null
         }
         Insert: {
           account_id: string
           credit?: number
+          customer_id?: string | null
           debit?: number
           description?: string | null
           id?: string
           journal_entry_id: string
+          memo?: string | null
+          tax_amount?: number
+          transaction_type?: string | null
+          vendor_id?: string | null
         }
         Update: {
           account_id?: string
           credit?: number
+          customer_id?: string | null
           debit?: number
           description?: string | null
           id?: string
           journal_entry_id?: string
+          memo?: string | null
+          tax_amount?: number
+          transaction_type?: string | null
+          vendor_id?: string | null
         }
         Relationships: [
           {
@@ -794,6 +887,39 @@ export type Database = {
         }
         Relationships: []
       }
+      vendors: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          is_active: boolean
+          phone: string | null
+          user_business_id: string
+          user_id: string
+          vendor_name: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          phone?: string | null
+          user_business_id: string
+          user_id: string
+          vendor_name: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          phone?: string | null
+          user_business_id?: string
+          user_id?: string
+          vendor_name?: string
+        }
+        Relationships: []
+      }
       wallet_budgets: {
         Row: {
           amount_planned: number
@@ -835,7 +961,15 @@ export type Database = {
       }
     }
     Enums: {
-      account_type: "asset" | "liability" | "equity" | "income" | "expense"
+      account_type:
+        | "asset"
+        | "liability"
+        | "equity"
+        | "income"
+        | "expense"
+        | "cogs"
+        | "other_income"
+        | "other_expense"
       app_role: "admin" | "user"
       bank_account_type: "checking" | "savings" | "mobile_money" | "cash"
       business_difficulty: "easy" | "medium" | "hard"
@@ -969,7 +1103,16 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      account_type: ["asset", "liability", "equity", "income", "expense"],
+      account_type: [
+        "asset",
+        "liability",
+        "equity",
+        "income",
+        "expense",
+        "cogs",
+        "other_income",
+        "other_expense",
+      ],
       app_role: ["admin", "user"],
       bank_account_type: ["checking", "savings", "mobile_money", "cash"],
       business_difficulty: ["easy", "medium", "hard"],
