@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Pencil, Trash2, Plus, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, Building2, Wallet, Banknote } from "lucide-react";
+import { Pencil, Trash2, Plus, ArrowDownLeft, ArrowUpRight, ArrowLeftRight, Building2, Wallet, Banknote, Calendar as CalendarIcon, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { PageHeader } from "@/components/page";
