@@ -203,22 +203,35 @@ function BankAccounts() {
   // ---------- Transaction ----------
   const openTx = (a: BankAccount) => {
     setTxAccount(a);
-    setTxForm(emptyTxForm);
+    setTxForm({ ...emptyTxForm, date: new Date().toISOString().slice(0, 10) });
+    setAccountSearchQuery("");
     setTxModalOpen(true);
   };
 
-  const offsetOptions = useMemo(() => {
+  const handleTxTypeChange = (type: TxType) => {
+    setTxForm({ ...txForm, type, offset_account_id: "" });
+    setAccountSearchQuery("");
+  };
+
+  const filteredOffsetOptions = useMemo(() => {
     if (!txAccount) return [];
-    const bankChartIds = new Set(accounts.filter((x) => x.id !== txAccount.id).map((x) => x.chart_account_id));
+    const bankChartIds = new Set(
+      accounts.filter((x) => x.id !== txAccount.id && x.chart_account_id).map((x) => x.chart_account_id as string)
+    );
+    let list: ChartAccount[] = [];
     if (txForm.type === "in") {
-      return chart.filter((c) => ["income", "equity", "liability", "asset"].includes(c.type) && c.id !== txAccount.chart_account_id);
+      list = chart.filter((c) => ["income", "equity", "liability", "asset"].includes(c.type) && c.id !== txAccount.chart_account_id);
+    } else if (txForm.type === "out") {
+      list = chart.filter((c) => ["expense", "asset", "liability"].includes(c.type) && c.id !== txAccount.chart_account_id);
+    } else {
+      list = chart.filter((c) => bankChartIds.has(c.id));
     }
-    if (txForm.type === "out") {
-      return chart.filter((c) => ["expense", "asset", "liability"].includes(c.type) && c.id !== txAccount.chart_account_id);
-    }
-    // transfer
-    return chart.filter((c) => bankChartIds.has(c.id));
-  }, [txForm.type, chart, accounts, txAccount]);
+    const q = accountSearchQuery.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter(
+      (c) => c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q) || c.type.toLowerCase().includes(q)
+    );
+  }, [txForm.type, chart, accounts, txAccount, accountSearchQuery]);
 
   const txValid = () => {
     const amt = parseFloat(txForm.amount) || 0;
