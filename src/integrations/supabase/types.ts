@@ -443,6 +443,30 @@ export type Database = {
         }
         Relationships: []
       }
+      expense_categories: {
+        Row: {
+          created_at: string
+          id: string
+          is_default: boolean
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       journal_entries: {
         Row: {
           created_at: string
@@ -592,6 +616,99 @@ export type Database = {
         }
         Relationships: []
       }
+      personal_budgets: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          limit_amount: number
+          month: number
+          user_id: string
+          year: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          limit_amount: number
+          month: number
+          user_id: string
+          year: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          limit_amount?: number
+          month?: number
+          user_id?: string
+          year?: number
+        }
+        Relationships: []
+      }
+      personal_expenses: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          description: string | null
+          expense_date: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          category: string
+          created_at?: string
+          description?: string | null
+          expense_date?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          description?: string | null
+          expense_date?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      personal_income: {
+        Row: {
+          amount: number
+          created_at: string
+          frequency: string
+          id: string
+          month: number
+          source: string
+          user_id: string
+          year: number
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          frequency: string
+          id?: string
+          month: number
+          source: string
+          user_id: string
+          year: number
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          frequency?: string
+          id?: string
+          month?: number
+          source?: string
+          user_id?: string
+          year?: number
+        }
+        Relationships: []
+      }
       personal_transactions: {
         Row: {
           amount: number
@@ -701,29 +818,38 @@ export type Database = {
         Row: {
           created_at: string
           current_amount: number
+          deadline: string | null
           id: string
+          month: number | null
           name: string
           target_amount: number
           target_date: string | null
           user_id: string
+          year: number | null
         }
         Insert: {
           created_at?: string
           current_amount?: number
+          deadline?: string | null
           id?: string
+          month?: number | null
           name: string
           target_amount: number
           target_date?: string | null
           user_id: string
+          year?: number | null
         }
         Update: {
           created_at?: string
           current_amount?: number
+          deadline?: string | null
           id?: string
+          month?: number | null
           name?: string
           target_amount?: number
           target_date?: string | null
           user_id?: string
+          year?: number | null
         }
         Relationships: []
       }
@@ -958,6 +1084,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      seed_default_expense_categories: {
+        Args: { _user_id: string }
+        Returns: undefined
       }
     }
     Enums: {
