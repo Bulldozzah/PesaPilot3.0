@@ -254,7 +254,7 @@ function BankAccounts() {
       const { count } = await supabase
         .from("journal_entries")
         .select("id", { count: "exact", head: true })
-        .eq("user_id", user!.id);
+        .eq("user_business_id", selectedBusinessId);
       reference = `${prefix}-${year}-${String((count ?? 0) + 1).padStart(4, "0")}`;
     }
 
