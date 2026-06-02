@@ -27,12 +27,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(s?.user ?? null);
       setIsLoading(false);
     });
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setUser(data.session?.user ?? null);
+
+    const hydrate = async () => {
+      const { data } = await supabase.auth.getSession();
+      let s = data.session;
+      // If token is expired or about to expire (<60s), refresh proactively.
+      const expSec = s?.expires_at ?? 0;
+      const nowSec = Math.floor(Date.now() / 1000);
+      if (s && expSec - nowSec < 60) {
+        const { data: refreshed } = await supabase.auth.refreshSession();
+        s = refreshed.session ?? null;
+      }
+      setSession(s);
+      setUser(s?.user ?? null);
       setIsLoading(false);
-    });
-    return () => sub.subscription.unsubscribe();
+    };
+    hydrate();
+
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void hydrate();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+
+    return () => {
+      sub.subscription.unsubscribe();
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, []);
 
   return (
