@@ -93,6 +93,15 @@ function Profile() {
     }
     setSaving(true);
     const fullPhone = phoneWithoutPrefix ? `${phonePrefix} ${phoneWithoutPrefix.trim()}` : "";
+    // Ensure token is fresh before write (avoids JWT expired on idle tabs).
+    {
+      const { data: s } = await supabase.auth.getSession();
+      const expSec = s.session?.expires_at ?? 0;
+      const nowSec = Math.floor(Date.now() / 1000);
+      if (s.session && expSec - nowSec < 60) {
+        await supabase.auth.refreshSession();
+      }
+    }
     const { error } = await supabase
       .from("profiles")
       .update({
