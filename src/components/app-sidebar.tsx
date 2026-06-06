@@ -1,4 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import {
   BookOpen, Building2, Compass, Home, Landmark, LayoutDashboard, LineChart,
   ListChecks, LogOut, PiggyBank, Shield, Sparkles, Users, Wallet,
@@ -52,7 +53,14 @@ const sections = [
 export function AppSidebar() {
   const path = useRouterState({ select: (r) => r.location.pathname });
   const { user } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
   const isActive = (p: string) => path === p || path.startsWith(p + "/");
+
+  useEffect(() => {
+    if (!user) { setIsAdmin(false); return; }
+    supabase.from("user_roles").select("role").eq("user_id", user.id)
+      .then(({ data }) => setIsAdmin((data ?? []).some((r) => r.role === "admin")));
+  }, [user]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -101,13 +109,15 @@ export function AppSidebar() {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isActive("/admin")} tooltip="Admin">
-                  <Link to="/admin">
-                    <Shield /> <span>Admin</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {isAdmin && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/admin")} tooltip="Admin">
+                    <Link to="/admin">
+                      <Shield /> <span>Admin</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

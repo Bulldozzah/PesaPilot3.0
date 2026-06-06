@@ -65,12 +65,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const hydrate = async () => {
       const { data } = await supabase.auth.getSession();
       let s = data.session;
-      // Refresh if token expires within 5 minutes (handles long idle / sleep)
+      // Refresh if token expires within 10 minutes (handles long idle / sleep)
       const expSec = s?.expires_at ?? 0;
       const nowSec = Math.floor(Date.now() / 1000);
-      if (s && expSec - nowSec < 300) {
-        const { data: refreshed } = await supabase.auth.refreshSession();
-        s = refreshed.session ?? s;
+      if (s && expSec - nowSec < 600) {
+        const { data: refreshed, error } = await supabase.auth.refreshSession();
+        if (!error && refreshed.session) {
+          s = refreshed.session;
+        } else if (error) {
+          console.warn("Session refresh failed:", error.message);
+          // If refresh fails, clear session to force re-login
+          s = null;
+        }
       }
       setSession(s);
       setUser(s?.user ?? null);

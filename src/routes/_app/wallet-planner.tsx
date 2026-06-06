@@ -137,7 +137,7 @@ function WalletPlanner() {
         <div className="grid gap-1"><Label>Year</Label>
           <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
             <SelectTrigger className="w-28"><SelectValue /></SelectTrigger>
-            <SelectContent>{Array.from({ length: 11 }, (_, i) => now.getFullYear() - 5 + i).map((y) => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}</SelectContent>
+            <SelectContent>{Array.from({ length: 2040 - 2025 + 1 }, (_, i) => 2025 + i).map((y) => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}</SelectContent>
           </Select>
         </div>
         <div className="ml-auto text-sm text-right">

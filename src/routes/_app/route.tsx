@@ -30,12 +30,24 @@ function AppLayout() {
     }
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
+      // Ensure session is fresh before checking profile
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        // Session expired, let auth context handle redirect to login
+        return;
+      }
+      const { data, error } = await supabase
         .from("profiles")
         .select("completed_onboarding, full_name")
         .eq("id", user.id)
         .maybeSingle();
       if (cancelled) return;
+      // If 401/auth error, don't redirect to profile setup - session issue
+      if (error?.code === "PGRST301" || error?.message?.includes("JWT")) {
+        console.warn("Auth error during profile check, refreshing session...");
+        await supabase.auth.refreshSession();
+        return;
+      }
       setProfileChecked(true);
       const complete = !!data?.completed_onboarding && !!data?.full_name?.trim();
       if (!complete) {

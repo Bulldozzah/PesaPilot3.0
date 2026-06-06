@@ -616,6 +616,72 @@ export type Database = {
         }
         Relationships: []
       }
+      microfinance_institutions: {
+        Row: {
+          address: string | null
+          country: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          email: string | null
+          id: string
+          interest_rate_max: number | null
+          interest_rate_min: number | null
+          is_active: boolean
+          logo_url: string | null
+          max_loan: number | null
+          min_loan: number | null
+          name: string
+          phone: string | null
+          required_documents: string[]
+          updated_at: string
+          website: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          address?: string | null
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          email?: string | null
+          id?: string
+          interest_rate_max?: number | null
+          interest_rate_min?: number | null
+          is_active?: boolean
+          logo_url?: string | null
+          max_loan?: number | null
+          min_loan?: number | null
+          name: string
+          phone?: string | null
+          required_documents?: string[]
+          updated_at?: string
+          website?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          address?: string | null
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          email?: string | null
+          id?: string
+          interest_rate_max?: number | null
+          interest_rate_min?: number | null
+          is_active?: boolean
+          logo_url?: string | null
+          max_loan?: number | null
+          min_loan?: number | null
+          name?: string
+          phone?: string | null
+          required_documents?: string[]
+          updated_at?: string
+          website?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
       personal_budgets: {
         Row: {
           category: string
