@@ -386,7 +386,7 @@ function BalanceSheet({ accounts, endDate, balanceUpTo, startDate, balanceInRang
 function CashFlow({ accounts, entries, startDate, endDate, balanceUpTo }: RenderProps) {
   const money = useMoney();
   const cashAccounts = accounts.filter((a) =>
-    a.type === "asset" && (/cash|bank|checking|savings|wallet/i.test(a.name) || /^1[012]/.test(a.code))
+    a.type === "asset" && (/cash|bank|checking|savings|wallet/i.test(a.name) || /^10\d{2}$/.test(a.code))
   );
   const cashIds = new Set(cashAccounts.map((a) => a.id));
 
