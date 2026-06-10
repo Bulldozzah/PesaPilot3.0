@@ -391,7 +391,8 @@ function CashFlow({ accounts, entries, startDate, endDate, balanceUpTo }: Render
   const cashIds = new Set(cashAccounts.map((a) => a.id));
 
   let opening = 0;
-  for (const a of cashAccounts) opening += balanceUpTo(a.id, startDate).balance;
+  const dayBefore = new Date(new Date(startDate).getTime() - 86400000).toISOString().slice(0, 10);
+  for (const a of cashAccounts) opening += balanceUpTo(a.id, dayBefore).balance;
 
   const buckets = { operating: 0, investing: 0, financing: 0 };
   const inflows: Record<string, { name: string; v: number }[]> = { operating: [], investing: [], financing: [] };
@@ -409,7 +410,7 @@ function CashFlow({ accounts, entries, startDate, endDate, balanceUpTo }: Render
     const otype = other?.type ?? "";
     let bucket: "operating" | "investing" | "financing" = "operating";
     if (otype === "equity" || /loan|capital|dividend/i.test(oname)) bucket = "financing";
-    else if (/equipment|property|machinery|vehicle|building/i.test(oname)) bucket = "investing";
+    else if (/equipment|property|machinery|vehicle|building|furniture|fixture/i.test(oname)) bucket = "investing";
     buckets[bucket] += net;
     (net > 0 ? inflows[bucket] : outflows[bucket]).push({ name: oname, v: Math.abs(net) });
   }

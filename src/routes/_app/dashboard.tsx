@@ -6,7 +6,7 @@ import { PageHeader, StatCard, QuickAction } from "@/components/page";
 import { useMoney } from "@/lib/format";
 
 export const Route = createFileRoute("/_app/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — Pilot-Pesa" }] }),
+  head: () => ({ meta: [{ title: "Dashboard — PesaPilot" }] }),
   component: Dashboard,
 });
 

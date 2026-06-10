@@ -142,7 +142,7 @@ function Profile() {
 
       <PageHeader
         title={isFirstTime ? "Set up your profile" : "Your profile"}
-        subtitle={isFirstTime ? "A few details so we can tailor Pilot-Pesa to you." : "Update your details and preferences."}
+        subtitle={isFirstTime ? "A few details so we can tailor PesaPilot to you." : "Update your details and preferences."}
       />
 
       <div className="grid gap-6 lg:grid-cols-2">

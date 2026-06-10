@@ -80,14 +80,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Pilot-Pesa — Launch, run and grow your small business" },
+      { title: "PesaPilot — Launch, run and grow your small business" },
       {
         name: "description",
         content:
-          "Pilot-Pesa is your AI-guided business coach: browse 100+ business ideas, follow step-by-step roadmaps, and track double-entry finances for your business and personal life.",
+          "PesaPilot is your AI-guided business coach: browse 100+ business ideas, follow step-by-step roadmaps, and track double-entry finances for your business and personal life.",
       },
-      { name: "author", content: "Pilot-Pesa" },
-      { property: "og:title", content: "Pilot-Pesa — Launch, run and grow your small business" },
+      { name: "author", content: "PesaPilot" },
+      { property: "og:title", content: "PesaPilot — Launch, run and grow your small business" },
       { property: "og:description", content: "Your AI co-pilot for starting and running a profitable small business." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

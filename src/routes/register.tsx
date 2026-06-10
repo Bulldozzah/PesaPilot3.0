@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
-import { Sparkles } from "lucide-react";
+import { Plane } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/register")({
-  head: () => ({ meta: [{ title: "Create account — Pilot-Pesa" }] }),
+  head: () => ({ meta: [{ title: "Create account — PesaPilot" }] }),
   component: RegisterPage,
 });
 
@@ -67,8 +67,8 @@ function RegisterPage() {
     <div className="grid min-h-screen md:grid-cols-2">
       <div className="flex items-center justify-center px-6 py-12 md:order-2 bg-navy-gradient text-primary-foreground md:flex-col md:justify-between md:p-12 md:items-start hidden md:flex">
         <Link to="/" className="flex items-center gap-2">
-          <div className="grid h-9 w-9 place-items-center rounded-lg bg-white/10 backdrop-blur"><Sparkles className="h-5 w-5" /></div>
-          <span className="font-display text-xl font-bold">Pilot-Pesa</span>
+          <div className="grid h-9 w-9 place-items-center rounded-lg bg-white/10 backdrop-blur"><Plane className="h-5 w-5" /></div>
+          <span className="font-display text-xl font-bold">PesaPilot</span>
         </Link>
         <div>
           <h1 className="font-display text-4xl font-bold leading-tight">Build your business with a co-pilot, not alone.</h1>

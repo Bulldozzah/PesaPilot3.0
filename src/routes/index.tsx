@@ -1,11 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, BookOpen, LineChart, Map, PiggyBank, Shield, Sparkles, Wallet } from "lucide-react";
+import { ArrowRight, BookOpen, LineChart, Map, Plane, PiggyBank, Shield, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Pilot-Pesa — Your AI Co-pilot for Small Business" },
+      { title: "PesaPilot — Your AI Co-pilot for Small Business" },
       {
         name: "description",
         content:
@@ -22,9 +22,9 @@ function Landing() {
       <header className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
         <Link to="/" className="flex items-center gap-2">
           <div className="grid h-9 w-9 place-items-center rounded-lg bg-navy-gradient text-white">
-            <Sparkles className="h-5 w-5" />
+            <Plane className="h-5 w-5" />
           </div>
-          <span className="font-display text-xl font-bold tracking-tight">Pilot-Pesa</span>
+          <span className="font-display text-xl font-bold tracking-tight">PesaPilot</span>
         </Link>
         <nav className="hidden items-center gap-8 md:flex">
           <a href="#features" className="text-sm font-medium text-muted-foreground hover:text-foreground">Features</a>
@@ -49,7 +49,7 @@ function Landing() {
             From <span className="text-primary">"I want to start"</span> to running a profitable business.
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-            Pilot-Pesa is your personal business coach and bookkeeper. Browse 100+ vetted business
+            PesaPilot is your personal business coach and bookkeeper. Browse 100+ vetted business
             ideas, follow guided roadmaps, and track every shilling with proper double-entry accounting.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
@@ -87,7 +87,7 @@ function Landing() {
 
       <section id="how" className="border-t border-border bg-card/50">
         <div className="mx-auto max-w-7xl px-6 py-20">
-          <h2 className="font-display text-3xl font-bold md:text-4xl">How Pilot-Pesa works</h2>
+          <h2 className="font-display text-3xl font-bold md:text-4xl">How PesaPilot works</h2>
           <div className="mt-10 grid gap-8 md:grid-cols-4">
             {[
               ["1", "Sign up", "Create your account and tell us your country and currency."],
@@ -119,7 +119,7 @@ function Landing() {
 
       <footer className="border-t border-border bg-card/50">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 text-sm text-muted-foreground">
-          <span>© {new Date().getFullYear()} Pilot-Pesa</span>
+          <span>© {new Date().getFullYear()} PesaPilot</span>
           <span>Built for entrepreneurs, by entrepreneurs.</span>
         </div>
       </footer>

@@ -32,7 +32,7 @@ export const Route = createFileRoute("/_app/onboarding")({
     templateId: typeof s.templateId === "string" ? s.templateId : undefined,
   }),
   ssr: false,
-  head: () => ({ meta: [{ title: "Onboarding — Pilot-Pesa" }] }),
+  head: () => ({ meta: [{ title: "Onboarding — PesaPilot" }] }),
   component: Onboarding,
 });
 
@@ -303,7 +303,7 @@ function StepAccounting() {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Pilot-Pesa gives you a complete accounting system out of the box.
+        PesaPilot gives you a complete accounting system out of the box.
       </p>
       <div className="grid gap-3 sm:grid-cols-2">
         {items.map((it) => (

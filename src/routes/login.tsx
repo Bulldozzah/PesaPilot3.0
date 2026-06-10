@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
-import { Sparkles } from "lucide-react";
+import { Plane } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/login")({
-  head: () => ({ meta: [{ title: "Log in — Pilot-Pesa" }] }),
+  head: () => ({ meta: [{ title: "Log in — PesaPilot" }] }),
   component: LoginPage,
 });
 
@@ -58,8 +58,8 @@ function LoginPage() {
     <div className="grid min-h-screen md:grid-cols-2">
       <div className="hidden bg-navy-gradient p-12 text-primary-foreground md:flex md:flex-col md:justify-between">
         <Link to="/" className="flex items-center gap-2">
-          <div className="grid h-9 w-9 place-items-center rounded-lg bg-white/10 backdrop-blur"><Sparkles className="h-5 w-5" /></div>
-          <span className="font-display text-xl font-bold">Pilot-Pesa</span>
+          <div className="grid h-9 w-9 place-items-center rounded-lg bg-white/10 backdrop-blur"><Plane className="h-5 w-5" /></div>
+          <span className="font-display text-xl font-bold">PesaPilot</span>
         </Link>
         <div>
           <h1 className="font-display text-4xl font-bold leading-tight">Welcome back, entrepreneur.</h1>

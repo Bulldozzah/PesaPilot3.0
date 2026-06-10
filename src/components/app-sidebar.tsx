@@ -2,7 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   BookOpen, Building2, Compass, Home, Landmark, LayoutDashboard, LineChart,
-  ListChecks, LogOut, PiggyBank, Shield, Sparkles, Users, Wallet,
+  ListChecks, LogOut, Plane, PiggyBank, Shield, Users, Wallet,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent,
@@ -72,9 +72,9 @@ export function AppSidebar() {
       <SidebarHeader>
         <Link to="/dashboard" className="flex items-center gap-2 px-2 py-2">
           <div className="grid h-8 w-8 place-items-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-            <Sparkles className="h-4 w-4" />
+            <Plane className="h-4 w-4" />
           </div>
-          <span className="font-display text-lg font-bold tracking-tight">Pilot-Pesa</span>
+          <span className="font-display text-lg font-bold tracking-tight">PesaPilot</span>
         </Link>
       </SidebarHeader>
       <SidebarContent>

@@ -32,7 +32,7 @@ type Template = {
 };
 
 export const Route = createFileRoute("/_app/businesses/")({
-  head: () => ({ meta: [{ title: "Start Your Business Journey — Pilot-Pesa" }] }),
+  head: () => ({ meta: [{ title: "Start Your Business Journey — PesaPilot" }] }),
   component: Discovery,
 });
 
@@ -160,13 +160,13 @@ function Discovery() {
       </div>
 
       {/* Cards grid */}
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {filtered.map((t) => {
           const cat = t.category_id ? catById[t.category_id] : undefined;
           const breakeven = Math.max(1, Math.round(t.startup_cost_min / (t.monthly_profit_min || 1)));
           return (
             <article key={t.id} className="group overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-              <div className="relative h-36 overflow-hidden bg-gradient-to-br from-primary/70 via-purple-500/60 to-fuchsia-500/60">
+              <div className="relative h-44 overflow-hidden bg-gradient-to-br from-primary/70 via-purple-500/60 to-fuchsia-500/60">
                 {t.image_url && (
                   <img src={t.image_url} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-110" />
                 )}
