@@ -109,6 +109,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  // In the SPA build (static index.html + createRoot on #root), rendering
+  // <html>/<head>/<body> makes React 19 claim the document singletons while
+  // the real tree lives inside #root. That desync sends React's event
+  // traversal into an infinite loop that freezes the tab as soon as an input
+  // is focused (facebook/react#35480). Only render the document shell when
+  // TanStack Start owns the document (SSR), where no #root container exists.
+  if (typeof document !== "undefined" && document.getElementById("root")) {
+    return (
+      <>
+        <HeadContent />
+        {children}
+      </>
+    );
+  }
   return (
     <html lang="en">
       <head>
