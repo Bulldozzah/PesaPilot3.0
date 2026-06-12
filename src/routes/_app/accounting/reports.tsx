@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   BarChart3, FileText, Scale, DollarSign, TrendingUp, TrendingDown,
-  List, Calculator, Receipt, CreditCard, Users, Printer, Building2,
+  List, Calculator, Receipt, CreditCard, Users, Printer, Building2, Package,
 } from "lucide-react";
 import {
   BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, AreaChart, Area,
@@ -34,6 +34,7 @@ type JEntry = {
   id: string; entry_date: string; reference: string | null; description: string | null;
   is_posted: boolean; journal_lines: JLine[];
 };
+type Contact = { id: string; name: string; type: string };
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4", "#ec4899", "#84cc16", "#f97316", "#14b8a6"];
 
@@ -54,10 +55,26 @@ const REPORTS = [
     { id: "ap", name: "A/P Aging", icon: CreditCard },
     { id: "ar", name: "A/R Aging", icon: Users },
   ]},
+  { group: "Customer Reports", items: [
+    { id: "salescust", name: "Sales by Customer", icon: Users },
+    { id: "custstmt", name: "Customer Statement", icon: FileText },
+    { id: "custledger", name: "Customer Ledger", icon: List },
+    { id: "custcredit", name: "Customer Credit / Outstanding", icon: CreditCard },
+  ]},
+  { group: "Sales Reports", items: [
+    { id: "salesreg", name: "Sales Register (Daily)", icon: Receipt },
+    { id: "salesmonth", name: "Monthly Sales Summary", icon: BarChart3 },
+  ]},
+  { group: "Inventory", items: [
+    { id: "invval", name: "Inventory Valuation & Turnover", icon: Package },
+  ]},
   { group: "Tax & Compliance", items: [
     { id: "tax", name: "Tax Summary", icon: Receipt },
   ]},
 ];
+
+// Reports that operate on a single chosen customer.
+const CUSTOMER_REPORTS = new Set(["custstmt", "custledger"]);
 
 // Operating revenue (sales/service). Credit-normal.
 const isOperatingIncome = (t: string) => t === "income" || t === "revenue";
@@ -98,6 +115,8 @@ function ReportsPage() {
   const [businessId, setBusinessId] = useState("");
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [entries, setEntries] = useState<JEntry[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [selectedCustomer, setSelectedCustomer] = useState("");
   const [loading, setLoading] = useState(false);
 
   const y = new Date().getFullYear();
@@ -124,9 +143,11 @@ function ReportsPage() {
         .select("*, journal_lines(*, chart_of_accounts(code,name,type,account_type))")
         .eq("user_business_id", businessId).eq("is_posted", true)
         .order("entry_date", { ascending: true }),
-    ]).then(([a, j]) => {
+      supabase.from("contacts").select("id,name,type").eq("user_business_id", businessId).order("name"),
+    ]).then(([a, j, c]) => {
       setAccounts((a.data as Account[]) ?? []);
       setEntries((j.data as JEntry[]) ?? []);
+      setContacts((c.data as Contact[]) ?? []);
       setLoading(false);
     });
   }, [businessId]);
@@ -202,6 +223,19 @@ function ReportsPage() {
             <Label className="text-xs">End date</Label>
             <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="w-40" />
           </div>
+          {CUSTOMER_REPORTS.has(activeReport) && (
+            <div>
+              <Label className="text-xs">Customer</Label>
+              <Select value={selectedCustomer} onValueChange={setSelectedCustomer}>
+                <SelectTrigger className="w-56"><SelectValue placeholder="Select customer" /></SelectTrigger>
+                <SelectContent>
+                  {contacts.filter((c) => c.type === "customer").map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
         <Button variant="outline" onClick={() => window.print()}><Printer className="mr-2 h-4 w-4" />Print</Button>
       </div>
@@ -216,6 +250,7 @@ function ReportsPage() {
         ) : (
           <ReportRender
             id={activeReport} accounts={accounts} entries={entries}
+            contacts={contacts} selectedCustomer={selectedCustomer}
             startDate={startDate} endDate={endDate}
             balanceUpTo={balanceUpTo} balanceInRange={balanceInRange}
           />
@@ -231,6 +266,7 @@ function Empty({ msg }: { msg: string }) {
 
 type RenderProps = {
   id: string; accounts: Account[]; entries: JEntry[];
+  contacts: Contact[]; selectedCustomer: string;
   startDate: string; endDate: string;
   balanceUpTo: (id: string, upTo?: string) => { debit: number; credit: number; balance: number };
   balanceInRange: (id: string, from: string, to: string) => { debit: number; credit: number; balance: number };
@@ -249,8 +285,32 @@ function ReportRender(p: RenderProps) {
     case "ap": return <AgingReport {...p} kind="ap" />;
     case "ar": return <AgingReport {...p} kind="ar" />;
     case "tax": return <TaxSummary {...p} />;
+    case "salescust": return <SalesByCustomer {...p} />;
+    case "custstmt": return <CustomerStatement {...p} kind="statement" />;
+    case "custledger": return <CustomerStatement {...p} kind="ledger" />;
+    case "custcredit": return <CustomerCredit {...p} />;
+    case "salesreg": return <SalesRegister {...p} />;
+    case "salesmonth": return <MonthlySales {...p} />;
+    case "invval": return <InventoryValuation {...p} />;
     default: return null;
   }
+}
+
+// ─── Customer / sales helpers ───────────────────────────────────────────────
+// Identify the A/R control account(s) and customer attribution from journal lines.
+const isReceivable = (a: Account) => /accounts?\s*receivable|\breceivable\b/i.test(a.name);
+
+// Per entry: the customer it belongs to (first line carrying a customer_id) and the
+// revenue it recognised (credits − debits on income-type accounts in that entry).
+function entryCustomerSales(e: JEntry, accountType: Map<string, string>) {
+  let custId: string | null = null;
+  let revenue = 0;
+  for (const l of e.journal_lines ?? []) {
+    if (!custId && l.customer_id) custId = l.customer_id;
+    const t = accountType.get(l.account_id) ?? l.chart_of_accounts?.type ?? "";
+    if (isOperatingIncome(t)) revenue += (Number(l.credit) || 0) - (Number(l.debit) || 0);
+  }
+  return { custId, revenue };
 }
 
 // ============ INCOME STATEMENT ============
@@ -922,6 +982,289 @@ function TaxSummary({ accounts, startDate, endDate, balanceInRange }: RenderProp
             </BarChart>
           </ResponsiveContainer>
         </ChartCard>
+      </div>
+    </div>
+  );
+}
+
+// ============ CUSTOMER & SALES REPORTS ============
+function customerName(contacts: Contact[], id: string | null): string {
+  if (!id) return "Unattributed";
+  return contacts.find((c) => c.id === id)?.name ?? "Unknown customer";
+}
+
+// SALES BY CUSTOMER — revenue attributed to each customer over the period.
+function SalesByCustomer({ accounts, entries, contacts, startDate, endDate }: RenderProps) {
+  const money = useMoney();
+  const accountType = new Map(accounts.map((a) => [a.id, a.type]));
+  const totals = new Map<string, number>();
+  for (const e of entries) {
+    if (e.entry_date < startDate || e.entry_date > endDate) continue;
+    const { custId, revenue } = entryCustomerSales(e, accountType);
+    if (Math.abs(revenue) < 0.005) continue;
+    const key = custId ?? "__none__";
+    totals.set(key, (totals.get(key) ?? 0) + revenue);
+  }
+  const rows = [...totals.entries()]
+    .map(([id, v]) => ({ id, name: id === "__none__" ? "Unattributed" : customerName(contacts, id), value: v }))
+    .filter((r) => Math.abs(r.value) > 0.005)
+    .sort((a, b) => b.value - a.value);
+  const total = rows.reduce((s, r) => s + r.value, 0);
+
+  return (
+    <div>
+      <ReportHeader title="Sales by Customer" period={`${startDate} → ${endDate}`} />
+      {rows.length === 0 ? (
+        <Empty msg="No customer-attributed sales in this period. Tag a journal line with a customer (on the sale or A/R line) to populate this." />
+      ) : (
+        <div className="grid gap-6 lg:grid-cols-2">
+          <table className="w-full text-sm">
+            <thead><tr className="border-b text-left text-muted-foreground"><th className="py-2">Customer</th><th className="text-right">Sales</th><th className="text-right">% of total</th></tr></thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.id} className="border-b border-border/50"><td className="py-2">{r.name}</td><td className="text-right">{money(r.value)}</td><td className="text-right">{total > 0 ? ((r.value / total) * 100).toFixed(1) : "0"}%</td></tr>
+              ))}
+              <tr className="font-bold"><td className="py-2">Total</td><td className="text-right">{money(total)}</td><td></td></tr>
+            </tbody>
+          </table>
+          <ChartCard title="Top Customers">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={rows.slice(0, 8).map((r) => ({ name: r.name, value: r.value }))} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" /><YAxis dataKey="name" type="category" width={90} />
+                <Tooltip formatter={(v: number) => money(v)} />
+                <Bar dataKey="value" fill="#3b82f6" />
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartCard>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// CUSTOMER STATEMENT / LEDGER — per-customer A/R activity with running balance.
+function CustomerStatement({ accounts, entries, contacts, selectedCustomer, startDate, endDate, kind }: RenderProps & { kind: "statement" | "ledger" }) {
+  const money = useMoney();
+  if (!selectedCustomer) return <Empty msg="Select a customer in the toolbar above to view this report." />;
+  const name = customerName(contacts, selectedCustomer);
+  const arIds = new Set(accounts.filter(isReceivable).map((a) => a.id));
+
+  const all: { date: string; desc: string; ref: string; charge: number; payment: number }[] = [];
+  for (const e of entries) {
+    for (const l of e.journal_lines ?? []) {
+      if (l.customer_id !== selectedCustomer || !arIds.has(l.account_id)) continue;
+      all.push({ date: e.entry_date, desc: e.description ?? "", ref: e.reference ?? "", charge: Number(l.debit) || 0, payment: Number(l.credit) || 0 });
+    }
+  }
+  all.sort((a, b) => a.date.localeCompare(b.date));
+
+  if (kind === "ledger") {
+    let running = 0;
+    const ledger = all.map((t) => { running += t.charge - t.payment; return { ...t, balance: running }; });
+    return (
+      <div>
+        <ReportHeader title={`Customer Ledger — ${name}`} period="All receivable transactions" />
+        {ledger.length === 0 ? <Empty msg="No receivable transactions for this customer." /> : (
+          <table className="w-full text-sm">
+            <thead><tr className="border-b text-left text-muted-foreground"><th className="py-2">Date</th><th>Description</th><th>Ref</th><th className="text-right">Invoice</th><th className="text-right">Payment</th><th className="text-right">Balance</th></tr></thead>
+            <tbody>
+              {ledger.map((t, i) => (
+                <tr key={i} className="border-b border-border/50"><td className="py-1">{t.date}</td><td>{t.desc}</td><td className="text-muted-foreground">{t.ref}</td><td className="text-right">{t.charge ? money(t.charge) : ""}</td><td className="text-right">{t.payment ? money(t.payment) : ""}</td><td className="text-right font-mono">{money(t.balance)}</td></tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+        <Row label="Current Balance Due" value={running} bold accent={running > 0.005 ? "destructive" : "success"} />
+      </div>
+    );
+  }
+
+  // Statement: opening balance + period activity + balance due.
+  const opening = all.filter((t) => t.date < startDate).reduce((s, t) => s + t.charge - t.payment, 0);
+  const period = all.filter((t) => t.date >= startDate && t.date <= endDate);
+  const invoiced = period.reduce((s, t) => s + t.charge, 0);
+  const paid = period.reduce((s, t) => s + t.payment, 0);
+  const closing = opening + invoiced - paid;
+  let run = opening;
+  return (
+    <div>
+      <ReportHeader title={`Customer Statement — ${name}`} period={`${startDate} → ${endDate}`} />
+      <div className="mb-4 grid gap-3 sm:grid-cols-4">
+        <StatCard label="Opening Balance" value={money(opening)} />
+        <StatCard label="Invoiced" value={money(invoiced)} />
+        <StatCard label="Paid" value={money(paid)} accent="success" />
+        <StatCard label="Balance Due" value={money(closing)} accent={closing > 0.005 ? "destructive" : "success"} />
+      </div>
+      <table className="w-full text-sm">
+        <thead><tr className="border-b text-left text-muted-foreground"><th className="py-2">Date</th><th>Description</th><th className="text-right">Invoice</th><th className="text-right">Payment</th><th className="text-right">Balance</th></tr></thead>
+        <tbody>
+          <tr className="border-b border-border/50 text-muted-foreground"><td className="py-1">{startDate}</td><td className="italic">Opening balance</td><td></td><td></td><td className="text-right font-mono">{money(opening)}</td></tr>
+          {period.map((t, i) => { run += t.charge - t.payment; return (
+            <tr key={i} className="border-b border-border/50"><td className="py-1">{t.date}</td><td>{t.desc}</td><td className="text-right">{t.charge ? money(t.charge) : ""}</td><td className="text-right">{t.payment ? money(t.payment) : ""}</td><td className="text-right font-mono">{money(run)}</td></tr>
+          ); })}
+        </tbody>
+      </table>
+      <div className="mt-3 rounded bg-primary/5 p-3 text-sm">Please remit the balance due of <b>{money(closing)}</b>. Thank you for your business.</div>
+    </div>
+  );
+}
+
+// CUSTOMER CREDIT / OUTSTANDING — every customer's current receivable balance.
+function CustomerCredit({ accounts, entries, contacts, endDate }: RenderProps) {
+  const money = useMoney();
+  const arIds = new Set(accounts.filter(isReceivable).map((a) => a.id));
+  const bal = new Map<string, number>();
+  for (const e of entries) {
+    if (e.entry_date > endDate) continue;
+    for (const l of e.journal_lines ?? []) {
+      if (!l.customer_id || !arIds.has(l.account_id)) continue;
+      bal.set(l.customer_id, (bal.get(l.customer_id) ?? 0) + (Number(l.debit) || 0) - (Number(l.credit) || 0));
+    }
+  }
+  const rows = [...bal.entries()].map(([id, v]) => ({ id, name: customerName(contacts, id), value: v }))
+    .filter((r) => Math.abs(r.value) > 0.005).sort((a, b) => b.value - a.value);
+  const total = rows.reduce((s, r) => s + r.value, 0);
+  return (
+    <div>
+      <ReportHeader title="Customer Credit / Outstanding" period={`As of ${endDate}`} />
+      <div className="mb-4 rounded-lg bg-amber-500/10 p-3 text-xs text-muted-foreground">
+        Credit limits aren't stored in your current data model, so this shows each customer's outstanding
+        receivable balance. Add a credit-limit field to a customer to enable limit-vs-balance flagging.
+      </div>
+      {rows.length === 0 ? <Empty msg="No outstanding customer balances." /> : (
+        <table className="w-full text-sm">
+          <thead><tr className="border-b text-left text-muted-foreground"><th className="py-2">Customer</th><th className="text-right">Outstanding</th></tr></thead>
+          <tbody>
+            {rows.map((r) => <tr key={r.id} className="border-b border-border/50"><td className="py-2">{r.name}</td><td className="text-right">{money(r.value)}</td></tr>)}
+            <tr className="font-bold"><td className="py-2">Total Receivable</td><td className="text-right">{money(total)}</td></tr>
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}
+
+// SALES REGISTER — every revenue-recognising entry in the period, by date.
+function SalesRegister({ accounts, entries, contacts, startDate, endDate }: RenderProps) {
+  const money = useMoney();
+  const accountType = new Map(accounts.map((a) => [a.id, a.type]));
+  const rows = entries
+    .filter((e) => e.entry_date >= startDate && e.entry_date <= endDate)
+    .map((e) => { const { custId, revenue } = entryCustomerSales(e, accountType); return { e, custId, revenue }; })
+    .filter((r) => Math.abs(r.revenue) > 0.005)
+    .sort((a, b) => a.e.entry_date.localeCompare(b.e.entry_date));
+  const total = rows.reduce((s, r) => s + r.revenue, 0);
+  return (
+    <div>
+      <ReportHeader title="Sales Register (Daily)" period={`${startDate} → ${endDate}`} />
+      {rows.length === 0 ? <Empty msg="No sales recorded in this period." /> : (
+        <table className="w-full text-sm">
+          <thead><tr className="border-b text-left text-muted-foreground"><th className="py-2">Date</th><th>Reference</th><th>Description</th><th>Customer</th><th className="text-right">Amount</th></tr></thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.e.id} className="border-b border-border/50"><td className="py-1">{r.e.entry_date}</td><td className="text-muted-foreground">{r.e.reference}</td><td>{r.e.description}</td><td>{customerName(contacts, r.custId)}</td><td className="text-right">{money(r.revenue)}</td></tr>
+            ))}
+            <tr className="font-bold"><td className="py-2" colSpan={4}>Total Sales</td><td className="text-right">{money(total)}</td></tr>
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}
+
+// MONTHLY SALES SUMMARY — operating revenue per month across the period.
+function MonthlySales({ accounts, startDate, endDate, balanceInRange }: RenderProps) {
+  const money = useMoney();
+  const incomeAccts = accounts.filter((a) => isOperatingIncome(a.type));
+  const start = new Date(`${startDate}T00:00:00`);
+  const end = new Date(`${endDate}T00:00:00`);
+  const months: { label: string; value: number }[] = [];
+  const cur = new Date(start.getFullYear(), start.getMonth(), 1);
+  let guard = 0;
+  while (cur <= end && guard++ < 120) {
+    const mFrom = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, "0")}-01`;
+    const mTo = new Date(cur.getFullYear(), cur.getMonth() + 1, 0).toISOString().slice(0, 10);
+    const from = mFrom < startDate ? startDate : mFrom;
+    const to = mTo > endDate ? endDate : mTo;
+    let v = 0;
+    for (const a of incomeAccts) v += -balanceInRange(a.id, from, to).balance;
+    months.push({ label: mFrom.slice(0, 7), value: v });
+    cur.setMonth(cur.getMonth() + 1);
+  }
+  const total = months.reduce((s, m) => s + m.value, 0);
+  const avg = months.length ? total / months.length : 0;
+  const best = months.reduce((b, m) => (m.value > b.value ? m : b), { label: "—", value: -Infinity });
+  return (
+    <div>
+      <ReportHeader title="Monthly Sales Summary" period={`${startDate} → ${endDate}`} />
+      <div className="mb-4 grid gap-3 sm:grid-cols-3">
+        <StatCard label="Total Sales" value={money(total)} />
+        <StatCard label="Monthly Average" value={money(avg)} />
+        <StatCard label="Best Month" value={best.value > 0 ? `${best.label} · ${money(best.value)}` : "—"} accent="success" />
+      </div>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <table className="w-full text-sm">
+          <thead><tr className="border-b text-left text-muted-foreground"><th className="py-2">Month</th><th className="text-right">Sales</th></tr></thead>
+          <tbody>
+            {months.map((m) => <tr key={m.label} className="border-b border-border/50"><td className="py-2">{m.label}</td><td className="text-right">{money(m.value)}</td></tr>)}
+            <tr className="font-bold"><td className="py-2">Total</td><td className="text-right">{money(total)}</td></tr>
+          </tbody>
+        </table>
+        <ChartCard title="Sales Trend">
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={months}>
+              <CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="label" /><YAxis /><Tooltip formatter={(v: number) => money(v)} />
+              <Bar dataKey="value" fill="#10b981" />
+            </BarChart>
+          </ResponsiveContainer>
+        </ChartCard>
+      </div>
+    </div>
+  );
+}
+
+// INVENTORY VALUATION & TURNOVER — accounting-level (from inventory asset accounts).
+function InventoryValuation({ accounts, startDate, endDate, balanceUpTo, balanceInRange }: RenderProps) {
+  const money = useMoney();
+  const invAccts = accounts.filter((a) =>
+    a.type === "asset" && (/inventory|raw material|work.?in.?progress|finished goods|\bstock\b|\bwip\b/i.test(a.name) || /^12\d{2}$/.test(a.code)));
+  const rows = invAccts.map((a) => ({ a, v: balanceUpTo(a.id, endDate).balance })).filter((r) => Math.abs(r.v) > 0.005);
+  const totalInv = rows.reduce((s, r) => s + r.v, 0);
+  const opening = invAccts.reduce((s, a) => s + balanceUpTo(a.id, dayBefore(startDate)).balance, 0);
+  const avgInv = (opening + totalInv) / 2;
+  const cogs = plTotals(accounts, (id) => balanceInRange(id, startDate, endDate).balance).cogs;
+  const turnover = avgInv > 0 ? cogs / avgInv : 0;
+  return (
+    <div>
+      <ReportHeader title="Inventory Valuation & Turnover" period={`As of ${endDate}`} />
+      <div className="mb-4 rounded-lg bg-amber-500/10 p-3 text-xs text-muted-foreground">
+        Derived from your inventory asset accounts in the general ledger (accounting value). Per-item
+        quantities, stock movement, inventory aging, reorder levels, and physical counts require a
+        product/inventory module, which isn't part of the current data model.
+      </div>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div>
+          <Section title="Inventory on Hand (by account)" rows={rows.map((r) => ({ label: `${r.a.code} — ${r.a.name}`, value: r.v }))} total={totalInv} />
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <StatCard label="Avg Inventory" value={money(avgInv)} />
+            <StatCard label="COGS (period)" value={money(cogs)} />
+            <StatCard label="Turnover" value={`${turnover.toFixed(2)}×`} accent={turnover >= 1 ? "success" : undefined} />
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">Inventory turnover = COGS ÷ average inventory. Higher means stock sells faster; lower means cash is tied up in slow-moving goods.</p>
+        </div>
+        {rows.length > 0 && (
+          <ChartCard title="Inventory Composition">
+            <ResponsiveContainer width="100%" height={260}>
+              <PieChart>
+                <Pie data={rows.map((r) => ({ name: r.a.name, value: r.v }))} dataKey="value" nameKey="name" outerRadius={90} label>
+                  {rows.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                </Pie>
+                <Tooltip formatter={(v: number) => money(v)} />
+              </PieChart>
+            </ResponsiveContainer>
+          </ChartCard>
+        )}
       </div>
     </div>
   );
