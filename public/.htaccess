@@ -13,10 +13,32 @@
 
 # Security headers
 <IfModule mod_headers.c>
+  # Stop MIME sniffing
   Header always set X-Content-Type-Options "nosniff"
+  # Clickjacking protection (legacy + modern via CSP frame-ancestors below)
   Header always set X-Frame-Options "SAMEORIGIN"
   Header always set X-XSS-Protection "1; mode=block"
+  # Don't leak full URLs (which can contain tokens) to third parties
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  # Lock down powerful browser features the app doesn't use
+  Header always set Permissions-Policy "geolocation=(), camera=(), microphone=(), payment=(), usb=()"
+  # Force HTTPS for 1 year (only enable once the domain is fully on HTTPS)
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+  # Content Security Policy — whitelists only the origins PesaPilot actually uses:
+  #   self            → the app bundle, styles, fonts
+  #   Supabase        → REST/auth (https) + realtime (wss)
+  #   Google Fonts    → fonts.googleapis.com (css) + fonts.gstatic.com (font files)
+  #   img https: data:→ user avatar_url values can be any https image, plus inline data URIs
+  # 'unsafe-inline' on style-src is required by the charting component's injected <style>.
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://hjvgslccdnfhezkrryqj.supabase.co wss://hjvgslccdnfhezkrryqj.supabase.co; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'"
 </IfModule>
+
+# Don't serve dotfiles (e.g. a stray .env) if one is ever uploaded by mistake
+<FilesMatch "^\.">
+  Require all denied
+</FilesMatch>
+# ...but the SPA rewrite still needs to serve the app; .htaccess itself is never served by Apache.
 
 # Cache static assets
 <IfModule mod_expires.c>
