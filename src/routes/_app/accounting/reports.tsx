@@ -59,9 +59,38 @@ const REPORTS = [
   ]},
 ];
 
-const isIncome = (t: string) => t === "income" || t === "revenue";
-const isExpense = (t: string) => t === "expense" || t === "cogs";
+// Operating revenue (sales/service). Credit-normal.
+const isOperatingIncome = (t: string) => t === "income" || t === "revenue";
+const isOtherIncome = (t: string) => t === "other_income";
+// Any income line that belongs on the P&L (operating + non-operating). Credit-normal.
+const isIncome = (t: string) => isOperatingIncome(t) || isOtherIncome(t);
+const isOtherExpense = (t: string) => t === "other_expense";
+// Any expense line on the P&L (COGS + operating + non-operating). Debit-normal.
+const isExpense = (t: string) => t === "expense" || t === "cogs" || isOtherExpense(t);
 const isCreditNormal = (t: string) => isIncome(t) || t === "liability" || t === "equity";
+
+// Signed P&L totals from a per-account balance function (balance = debit − credit).
+// Credit-normal income accounts contribute −balance, so a contra-revenue account
+// holding a debit balance (e.g. Sales Returns) correctly REDUCES revenue instead of
+// being added to it via Math.abs(). Likewise contra-COGS/contra-expense net out.
+function plTotals(accounts: Account[], bal: (id: string) => number) {
+  let opRev = 0, otherInc = 0, cogs = 0, opExp = 0, otherExp = 0;
+  for (const a of accounts) {
+    const b = bal(a.id);
+    if (isOperatingIncome(a.type)) opRev += -b;
+    else if (isOtherIncome(a.type)) otherInc += -b;
+    else if (a.type === "cogs") cogs += b;
+    else if (a.type === "expense") opExp += b;
+    else if (isOtherExpense(a.type)) otherExp += b;
+  }
+  const grossProfit = opRev - cogs;
+  const operatingIncome = grossProfit - opExp;
+  const netIncome = operatingIncome + otherInc - otherExp;
+  return { opRev, otherInc, cogs, opExp, otherExp, grossProfit, operatingIncome, netIncome };
+}
+
+// Day before an ISO date (for opening balances / prior retained earnings).
+const dayBefore = (iso: string) => new Date(new Date(iso).getTime() - 86400000).toISOString().slice(0, 10);
 
 function ReportsPage() {
   const { user } = useAuth();
@@ -227,27 +256,28 @@ function ReportRender(p: RenderProps) {
 // ============ INCOME STATEMENT ============
 function IncomeStatement({ accounts, startDate, endDate, balanceInRange }: RenderProps) {
   const money = useMoney();
-  const rev = accounts.filter((a) => isIncome(a.type));
-  const cogs = accounts.filter((a) => a.type === "cogs");
-  const exp = accounts.filter((a) => a.type === "expense");
+  const bal = (id: string) => balanceInRange(id, startDate, endDate).balance;
+  // Signed per-account values: credit-normal income shown as −balance (contra-revenue
+  // appears negative and nets down the total); debit-normal expense/COGS shown as balance.
+  const revRows = accounts.filter((a) => isOperatingIncome(a.type)).map((a) => ({ a, v: -bal(a.id) })).filter((r) => r.v !== 0);
+  const cogsRows = accounts.filter((a) => a.type === "cogs").map((a) => ({ a, v: bal(a.id) })).filter((r) => r.v !== 0);
+  const expRows = accounts.filter((a) => a.type === "expense").map((a) => ({ a, v: bal(a.id) })).filter((r) => r.v !== 0);
+  const otherIncRows = accounts.filter((a) => isOtherIncome(a.type)).map((a) => ({ a, v: -bal(a.id) })).filter((r) => r.v !== 0);
+  const otherExpRows = accounts.filter((a) => isOtherExpense(a.type)).map((a) => ({ a, v: bal(a.id) })).filter((r) => r.v !== 0);
 
-  const revRows = rev.map((a) => ({ a, v: Math.abs(balanceInRange(a.id, startDate, endDate).balance) })).filter((r) => r.v > 0);
-  const cogsRows = cogs.map((a) => ({ a, v: Math.abs(balanceInRange(a.id, startDate, endDate).balance) })).filter((r) => r.v > 0);
-  const expRows = exp.map((a) => ({ a, v: Math.abs(balanceInRange(a.id, startDate, endDate).balance) })).filter((r) => r.v > 0);
-
-  const totalRev = revRows.reduce((s, r) => s + r.v, 0);
-  const totalCogs = cogsRows.reduce((s, r) => s + r.v, 0);
-  const totalExp = expRows.reduce((s, r) => s + r.v, 0);
-  const grossProfit = totalRev - totalCogs;
-  const netIncome = grossProfit - totalExp;
+  const t = plTotals(accounts, bal);
+  const totalRev = t.opRev, totalCogs = t.cogs, totalExp = t.opExp;
+  const grossProfit = t.grossProfit;
+  const netIncome = t.netIncome;
 
   const chartData = [
     { name: "Revenue", value: totalRev },
     { name: "COGS", value: totalCogs },
-    { name: "Expenses", value: totalExp },
+    { name: "Expenses", value: totalExp + t.otherExp },
+    { name: "Other Income", value: t.otherInc },
     { name: "Net Income", value: netIncome },
-  ];
-  const expBreakdown = expRows.map((r) => ({ name: r.a.name, value: r.v }));
+  ].filter((d) => d.value !== 0);
+  const expBreakdown = expRows.filter((r) => r.v > 0).map((r) => ({ name: r.a.name, value: r.v }));
 
   return (
     <div>
@@ -258,6 +288,9 @@ function IncomeStatement({ accounts, startDate, endDate, balanceInRange }: Rende
           {cogsRows.length > 0 && <Section title="Cost of Goods Sold" rows={cogsRows.map((r) => ({ label: `${r.a.code} — ${r.a.name}`, value: r.v }))} total={totalCogs} />}
           <Row label="Gross Profit" value={grossProfit} bold className="bg-primary/5 px-2 rounded" />
           <Section title="Operating Expenses" rows={expRows.map((r) => ({ label: `${r.a.code} — ${r.a.name}`, value: r.v }))} total={totalExp} />
+          <Row label="Operating Income" value={t.operatingIncome} bold className="bg-primary/5 px-2 rounded" />
+          {otherIncRows.length > 0 && <Section title="Other Income" rows={otherIncRows.map((r) => ({ label: `${r.a.code} — ${r.a.name}`, value: r.v }))} total={t.otherInc} />}
+          {otherExpRows.length > 0 && <Section title="Other Expenses" rows={otherExpRows.map((r) => ({ label: `${r.a.code} — ${r.a.name}`, value: r.v }))} total={t.otherExp} />}
           <Row label={netIncome >= 0 ? "Net Profit" : "Net Loss"} value={netIncome} bold accent={netIncome >= 0 ? "success" : "destructive"} />
         </div>
         <div className="space-y-6">
@@ -309,16 +342,18 @@ function BalanceSheet({ accounts, endDate, balanceUpTo, startDate, balanceInRang
   const equity = accounts.filter((a) => a.type === "equity")
     .map((a) => ({ a, v: -balanceUpTo(a.id, endDate).balance })).filter((r) => r.v !== 0);
 
-  // Net income from start..end
-  const incomeTotal = accounts.filter((a) => isIncome(a.type))
-    .reduce((s, a) => s + Math.abs(balanceInRange(a.id, startDate, endDate).balance), 0);
-  const expenseTotal = accounts.filter((a) => isExpense(a.type))
-    .reduce((s, a) => s + Math.abs(balanceInRange(a.id, startDate, endDate).balance), 0);
-  const netIncome = incomeTotal - expenseTotal;
+  // Current-period net income (start..end) using signed, contra-aware totals.
+  const netIncome = plTotals(accounts, (id) => balanceInRange(id, startDate, endDate).balance).netIncome;
+  // Retained earnings accumulated BEFORE this period (inception .. day before start).
+  // Income/expense accounts are never closed to equity in this app, so without this the
+  // balance sheet is short by all prior-period profit and won't balance for any period
+  // that doesn't start at inception.
+  const priorRetained = plTotals(accounts, (id) => balanceUpTo(id, dayBefore(startDate)).balance).netIncome;
 
   const totalAssets = assets.reduce((s, r) => s + r.v, 0);
   const totalLiab = liabilities.reduce((s, r) => s + r.v, 0);
-  const totalEquity = equity.reduce((s, r) => s + r.v, 0) + netIncome;
+  const equityContributed = equity.reduce((s, r) => s + r.v, 0);
+  const totalEquity = equityContributed + priorRetained + netIncome;
   const balanced = Math.abs(totalAssets - (totalLiab + totalEquity)) < 0.01;
 
   const chartData = [
@@ -336,6 +371,7 @@ function BalanceSheet({ accounts, endDate, balanceUpTo, startDate, balanceInRang
           <Section title="Liabilities" rows={liabilities.map((r) => ({ label: `${r.a.code} — ${r.a.name}`, value: r.v }))} total={totalLiab} />
           <Section title="Equity" rows={[
             ...equity.map((r) => ({ label: `${r.a.code} — ${r.a.name}`, value: r.v })),
+            ...(Math.abs(priorRetained) > 0.005 ? [{ label: "Retained Earnings (prior periods)", value: priorRetained }] : []),
             { label: "Current Period Net Income", value: netIncome },
           ]} total={totalEquity} />
           <Row label="Total Liabilities + Equity" value={totalLiab + totalEquity} bold />
@@ -507,11 +543,14 @@ function TrialBalanceReport({ accounts, endDate, balanceUpTo }: RenderProps) {
 }
 
 // ============ GENERAL LEDGER ============
-function GeneralLedgerReport({ accounts, entries, startDate, endDate }: RenderProps) {
+function GeneralLedgerReport({ accounts, entries, startDate, endDate, balanceUpTo }: RenderProps) {
   const money = useMoney();
   const data = accounts.map((a) => {
     const lines: { date: string; desc: string; debit: number; credit: number; balance: number }[] = [];
-    let bal = 0;
+    // Carry forward the account's balance from before the period so the running
+    // balance reflects the true account balance, not just in-period movement.
+    const opening = balanceUpTo(a.id, dayBefore(startDate)).balance;
+    let bal = opening;
     const sorted = [...entries].sort((x, y) => x.entry_date.localeCompare(y.entry_date));
     for (const e of sorted) {
       if (e.entry_date < startDate || e.entry_date > endDate) continue;
@@ -521,8 +560,8 @@ function GeneralLedgerReport({ accounts, entries, startDate, endDate }: RenderPr
         lines.push({ date: e.entry_date, desc: e.description ?? "", debit: Number(l.debit), credit: Number(l.credit), balance: bal });
       }
     }
-    return { a, lines, closing: bal };
-  }).filter((g) => g.lines.length > 0);
+    return { a, lines, opening, closing: bal };
+  }).filter((g) => g.lines.length > 0 || Math.abs(g.opening) > 0.005);
 
   return (
     <div>
@@ -538,6 +577,7 @@ function GeneralLedgerReport({ accounts, entries, startDate, endDate }: RenderPr
               <table className="w-full text-sm">
                 <thead><tr className="border-b text-left text-muted-foreground"><th className="py-1">Date</th><th>Description</th><th className="text-right">Debit</th><th className="text-right">Credit</th><th className="text-right">Balance</th></tr></thead>
                 <tbody>
+                  <tr className="border-b border-border/50 text-muted-foreground"><td className="py-1">{startDate}</td><td className="italic">Opening balance</td><td className="text-right"></td><td className="text-right"></td><td className="text-right font-mono">{money(g.opening)}</td></tr>
                   {g.lines.map((l, i) => (
                     <tr key={i} className="border-b border-border/50"><td className="py-1">{l.date}</td><td>{l.desc}</td><td className="text-right">{l.debit ? money(l.debit) : ""}</td><td className="text-right">{l.credit ? money(l.credit) : ""}</td><td className="text-right font-mono">{money(l.balance)}</td></tr>
                   ))}
@@ -593,9 +633,9 @@ function JournalReport({ entries, startDate, endDate }: RenderProps) {
 // ============ EXPENSE ANALYSIS ============
 function ExpenseAnalysis({ accounts, startDate, endDate, balanceInRange }: RenderProps) {
   const money = useMoney();
-  const totalRev = accounts.filter((a) => isIncome(a.type)).reduce((s, a) => s + Math.abs(balanceInRange(a.id, startDate, endDate).balance), 0);
-  const cogs = accounts.filter((a) => a.type === "cogs").map((a) => ({ a, v: Math.abs(balanceInRange(a.id, startDate, endDate).balance) })).filter((r) => r.v > 0);
-  const exp = accounts.filter((a) => a.type === "expense").map((a) => ({ a, v: Math.abs(balanceInRange(a.id, startDate, endDate).balance) })).filter((r) => r.v > 0);
+  const totalRev = plTotals(accounts, (id) => balanceInRange(id, startDate, endDate).balance).opRev;
+  const cogs = accounts.filter((a) => a.type === "cogs").map((a) => ({ a, v: balanceInRange(a.id, startDate, endDate).balance })).filter((r) => r.v > 0);
+  const exp = accounts.filter((a) => a.type === "expense").map((a) => ({ a, v: balanceInRange(a.id, startDate, endDate).balance })).filter((r) => r.v > 0);
   const totalCogs = cogs.reduce((s, r) => s + r.v, 0);
   const totalExp = exp.reduce((s, r) => s + r.v, 0);
   const pct = (v: number) => totalRev > 0 ? `${((v / totalRev) * 100).toFixed(1)}%` : "—";
@@ -665,8 +705,8 @@ function ExpenseAnalysis({ accounts, startDate, endDate, balanceInRange }: Rende
 // ============ REVENUE ANALYSIS ============
 function RevenueAnalysis({ accounts, startDate, endDate, balanceInRange, entries }: RenderProps) {
   const money = useMoney();
-  const revAccts = accounts.filter((a) => isIncome(a.type));
-  const total = revAccts.reduce((s, a) => s + Math.abs(balanceInRange(a.id, startDate, endDate).balance), 0);
+  const revAccts = accounts.filter((a) => isOperatingIncome(a.type));
+  const total = revAccts.reduce((s, a) => s + (-balanceInRange(a.id, startDate, endDate).balance), 0);
 
   // 12-month trend
   const end = new Date(endDate);
@@ -676,7 +716,7 @@ function RevenueAnalysis({ accounts, startDate, endDate, balanceInRange, entries
     const from = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
     const to = new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().slice(0, 10);
     let v = 0;
-    for (const a of revAccts) v += Math.abs(balanceInRange(a.id, from, to).balance);
+    for (const a of revAccts) v += (-balanceInRange(a.id, from, to).balance);
     months.push({ label: from.slice(0, 7), value: v });
   }
   const current = months[months.length - 1]?.value ?? 0;
@@ -685,7 +725,7 @@ function RevenueAnalysis({ accounts, startDate, endDate, balanceInRange, entries
   const avg = months.reduce((s, m) => s + m.value, 0) / 12;
   const variance = current - avg;
 
-  const bySource = revAccts.map((a) => ({ name: a.name, value: Math.abs(balanceInRange(a.id, startDate, endDate).balance) })).filter((x) => x.value > 0);
+  const bySource = revAccts.map((a) => ({ name: a.name, value: -balanceInRange(a.id, startDate, endDate).balance })).filter((x) => x.value > 0);
 
   return (
     <div>
@@ -750,36 +790,46 @@ function AgingReport({ accounts, entries, endDate, kind }: RenderProps & { kind:
     : /accounts? receivable|\breceivable\b/i.test(a.name));
   if (!account) return <Empty msg={`No ${kind === "ap" ? "Accounts Payable" : "Accounts Receivable"} account found in your Chart of Accounts.`} />;
 
-  // Collect transactions on this account
-  const txns: { date: string; desc: string; contact: string; charge: number; payment: number }[] = [];
+  // Collect transactions on this account, grouped by counterparty so one contact's
+  // payment can't settle another contact's invoice. Lines without a vendor/customer id
+  // fall into a shared "unattributed" bucket (FIFO within it).
+  type Txn = { date: string; desc: string; contact: string; charge: number; payment: number };
+  const byContact = new Map<string, Txn[]>();
   for (const e of entries) {
     if (e.entry_date > endDate) continue;
     for (const l of e.journal_lines ?? []) {
       if (l.account_id !== account.id) continue;
       const debit = Number(l.debit), credit = Number(l.credit);
-      if (kind === "ap") {
-        // credit = purchase (liability up), debit = payment
-        txns.push({ date: e.entry_date, desc: e.description ?? "", contact: "", charge: credit, payment: debit });
-      } else {
-        // debit = invoice, credit = collection
-        txns.push({ date: e.entry_date, desc: e.description ?? "", contact: "", charge: debit, payment: credit });
-      }
+      const contact = (kind === "ap" ? l.vendor_id : l.customer_id) ?? "unattributed";
+      // AP: credit = purchase (liability up), debit = payment.
+      // AR: debit = invoice, credit = collection.
+      const txn: Txn = kind === "ap"
+        ? { date: e.entry_date, desc: e.description ?? "", contact, charge: credit, payment: debit }
+        : { date: e.entry_date, desc: e.description ?? "", contact, charge: debit, payment: credit };
+      const arr = byContact.get(contact) ?? [];
+      arr.push(txn);
+      byContact.set(contact, arr);
     }
   }
-  txns.sort((a, b) => a.date.localeCompare(b.date));
 
-  // FIFO outstanding
+  // FIFO per contact: oldest charges settled first by that contact's payments only.
   const outstanding: { date: string; desc: string; remaining: number }[] = [];
-  let paymentPool = 0;
-  for (const t of txns) {
-    if (t.charge > 0) outstanding.push({ date: t.date, desc: t.desc, remaining: t.charge });
-    if (t.payment > 0) paymentPool += t.payment;
+  for (const txns of byContact.values()) {
+    txns.sort((a, b) => a.date.localeCompare(b.date));
+    const open: { date: string; desc: string; remaining: number }[] = [];
+    let pool = 0;
+    for (const t of txns) {
+      if (t.charge > 0) open.push({ date: t.date, desc: t.desc, remaining: t.charge });
+      if (t.payment > 0) pool += t.payment;
+    }
+    for (const o of open) {
+      if (pool <= 0) break;
+      const apply = Math.min(o.remaining, pool);
+      o.remaining -= apply; pool -= apply;
+    }
+    outstanding.push(...open);
   }
-  for (const o of outstanding) {
-    if (paymentPool <= 0) break;
-    const apply = Math.min(o.remaining, paymentPool);
-    o.remaining -= apply; paymentPool -= apply;
-  }
+  outstanding.sort((a, b) => a.date.localeCompare(b.date));
   const open = outstanding.filter((o) => o.remaining > 0.01);
 
   const today = new Date(endDate);
@@ -830,17 +880,17 @@ function AgingReport({ accounts, entries, endDate, kind }: RenderProps & { kind:
 // ============ TAX SUMMARY ============
 function TaxSummary({ accounts, startDate, endDate, balanceInRange }: RenderProps) {
   const money = useMoney();
-  const rev = accounts.filter((a) => isIncome(a.type)).reduce((s, a) => s + Math.abs(balanceInRange(a.id, startDate, endDate).balance), 0);
-  const cogs = accounts.filter((a) => a.type === "cogs").reduce((s, a) => s + Math.abs(balanceInRange(a.id, startDate, endDate).balance), 0);
-  const exp = accounts.filter((a) => a.type === "expense").reduce((s, a) => s + Math.abs(balanceInRange(a.id, startDate, endDate).balance), 0);
-  const grossProfit = rev - cogs;
-  const taxable = grossProfit - exp;
+  const t = plTotals(accounts, (id) => balanceInRange(id, startDate, endDate).balance);
+  const rev = t.opRev, cogs = t.cogs, exp = t.opExp;
+  const grossProfit = t.grossProfit;
+  // Taxable income = full accounting net income (includes other income/expense, nets contra).
+  const taxable = t.netIncome;
   const tax = Math.max(0, taxable * 0.3);
   const chart = [
     { name: "Revenue", value: rev },
     { name: "COGS", value: cogs },
     { name: "Gross Profit", value: grossProfit },
-    { name: "Expenses", value: exp },
+    { name: "Op. Expenses", value: exp },
     { name: "Taxable", value: taxable },
     { name: "Tax (30%)", value: tax },
   ];
@@ -853,8 +903,15 @@ function TaxSummary({ accounts, startDate, endDate, balanceInRange }: RenderProp
           <Row label="Less: COGS" value={-cogs} />
           <Row label="Gross Profit" value={grossProfit} bold />
           <Row label="Less: Operating Expenses" value={-exp} />
+          {t.otherInc !== 0 && <Row label="Add: Other Income" value={t.otherInc} />}
+          {t.otherExp !== 0 && <Row label="Less: Other Expenses" value={-t.otherExp} />}
           <Row label="Taxable Income" value={taxable} bold />
           <Row label="Estimated Tax (30%)" value={tax} bold accent="destructive" />
+          <p className="mt-3 rounded bg-amber-500/10 p-2 text-xs text-muted-foreground">
+            Rough estimate only. Applies a flat 30% to accounting profit; it does not handle
+            VAT/sales tax, withholding tax, capital allowances, loss carry-forward, or
+            non-deductible items. Confirm with a qualified tax advisor for your jurisdiction.
+          </p>
         </div>
         <ChartCard title="Tax Computation">
           <ResponsiveContainer width="100%" height={300}>
